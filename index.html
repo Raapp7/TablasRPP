@@ -1,0 +1,7082 @@
+<!DOCTYPE html>
+
+
+
+<html lang="es">
+
+
+
+<head>
+
+
+
+<meta charset="UTF-8">
+
+
+
+<meta
+
+    name="viewport"
+
+    content="width=device-width, initial-scale=1.0"
+
+>
+
+
+
+<title>
+
+    Generador de Tablas HTML
+
+</title>
+
+
+
+
+
+<style>
+
+
+
+* {
+
+    box-sizing: border-box;
+
+}
+
+
+
+
+
+html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    margin: 0;
+
+    /*
+       El body es el contenedor de desplazamiento vertical.
+       Al comenzar debajo de la barra de título, la barra vertical
+       también comienza debajo de los controles de ventana.
+    */
+    position: fixed;
+    top: 36px;
+    right: 0;
+    bottom: 0;
+    left: 0;
+
+    width: auto;
+    height: auto;
+    padding: 6px 0 0;
+    box-sizing: border-box;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    background: #f2f4f7;
+
+    color: #222;
+
+    transition:
+        background .25s ease,
+        color .25s ease;
+}
+/* =====================================================
+   PANTALLA DE CARGA (SPLASH SCREEN) - MINIMALISTA
+   ===================================================== */
+#pantalla-carga {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #0b0f19;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 999999;
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+
+#pantalla-carga.ocultar {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.splash-logo-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: splashAparicion 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.splash-icono {
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.4);
+    margin-bottom: 20px;
+    color: white;
+}
+
+.splash-icono svg {
+    width: 32px;
+    height: 32px;
+    stroke: currentColor;
+    stroke-width: 2;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.splash-titulo {
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 24px;
+    font-weight: 600;
+    color: #f8fafc;
+    letter-spacing: 0.5px;
+    margin: 0 0 6px 0;
+}
+
+.splash-subtitulo {
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 13px;
+    color: #94a3b8;
+    margin: 0;
+    letter-spacing: 0.2px;
+}
+
+.splash-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-top-color: #2563eb;
+    border-radius: 50%;
+    animation: splashGirar 0.8s linear infinite;
+    margin-top: 30px;
+}
+
+@keyframes splashAparicion {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes splashGirar {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+
+
+.contenedor {
+
+
+
+    max-width: 1200px;
+
+
+
+    margin: 30px auto;
+
+
+
+    padding: 0 20px;
+
+}
+
+
+
+
+
+h1 {
+
+    margin-bottom: 5px;
+
+}
+
+
+
+
+
+.descripcion {
+
+
+
+    color: #666;
+
+
+
+    margin-top: 0;
+
+}
+
+
+
+
+
+.panel {
+
+
+
+    background: white;
+
+
+
+    padding: 20px;
+
+
+
+    border-radius: 12px;
+
+
+
+    box-shadow:
+
+        0 3px 12px rgba(0,0,0,.08);
+
+
+
+    margin-bottom: 20px;
+
+
+
+    transition:
+
+        background .25s ease,
+
+        box-shadow .25s ease;
+
+}
+
+
+
+
+
+label {
+
+
+
+    display: block;
+
+
+
+    font-weight: bold;
+
+
+
+    margin-bottom: 7px;
+
+}
+
+
+
+
+
+textarea {
+
+
+
+    width: 100%;
+
+
+
+    min-height: 220px;
+
+
+
+    padding: 12px;
+
+
+
+    border:
+
+        1px solid #ccc;
+
+
+
+    border-radius: 8px;
+
+
+
+    resize: vertical;
+
+
+
+    font-family:
+
+        Consolas,
+
+        monospace;
+
+
+
+    font-size: 14px;
+
+
+
+    background: white;
+
+
+
+    color: #222;
+
+
+
+    transition:
+
+        background .25s ease,
+
+        color .25s ease,
+
+        border .25s ease;
+
+}
+
+
+
+
+
+/* =====================================================
+
+   CONTENEDOR DE ENCABEZADOS
+
+   ===================================================== */
+
+
+
+.encabezados-wrapper {
+
+
+
+    position: relative;
+
+
+
+    width: 100%;
+
+
+
+    margin-bottom: 20px;
+
+}
+
+
+
+
+
+.encabezados-scroll {
+
+
+
+    overflow-x: auto;
+
+
+
+    overflow-y: hidden;
+
+
+
+    width: 100%;
+
+
+
+    padding-bottom: 8px;
+
+
+
+    scroll-behavior: smooth;
+
+}
+
+
+
+
+
+
+/* CONTENEDOR DE ENCABEZADOS */
+
+.encabezados {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: flex-start;
+    gap: 10px;
+
+    width: max-content;
+    min-width: 100%;
+}
+
+/* TAMAÑO FIJO DE CADA COLUMNA */
+
+.encabezado-columna {
+    position: relative;
+
+    flex: 0 0 190px;
+
+    width: 190px;
+    min-width: 190px;
+    max-width: 190px;
+
+    box-sizing: border-box;
+}
+
+/* EVITAR QUE LOS INPUTS ALTEREN EL TAMAÑO */
+
+.encabezado-columna input {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+/* CONTENEDOR DEL DESPLAZAMIENTO */
+
+.encabezados-scroll {
+    flex: 1 1 0;
+    min-width: 0;
+    width: 100%;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+
+
+
+
+
+.encabezado-columna input {
+
+
+
+    width: 100%;
+
+
+
+    padding: 10px;
+
+
+
+    padding-right: 36px;
+
+
+
+    border:
+
+        1px solid #ccc;
+
+
+
+    border-radius: 7px;
+
+
+
+    background: white;
+
+
+
+    color: #222;
+
+
+
+    transition:
+
+        background .25s ease,
+
+        color .25s ease,
+
+        border .25s ease;
+
+}
+
+
+
+
+
+/* =====================================================
+
+   BOTÓN ELIMINAR COLUMNA — MINIMALISTA
+
+   ===================================================== */
+
+
+
+.boton-eliminar-columna {
+
+
+
+    position: absolute;
+
+
+
+    right: 8px;
+
+
+
+    bottom: 8px;
+
+
+
+    width: 20px;
+
+
+
+    height: 20px;
+
+
+
+    padding: 0;
+
+
+
+    margin: 0;
+
+
+
+    border-radius: 5px;
+
+
+
+    background: transparent;
+
+
+
+    color: #9ca3af;
+
+
+
+    font-size: 16px;
+
+
+
+    font-weight: normal;
+
+
+
+    line-height: 18px;
+
+
+
+    text-align: center;
+
+
+
+    display: none;
+
+
+
+    align-items: center;
+
+
+
+    justify-content: center;
+
+
+
+    transition:
+
+        background .18s ease,
+
+        color .18s ease,
+
+        transform .18s ease;
+
+}
+
+
+
+
+
+.encabezado-columna.adicional
+
+.boton-eliminar-columna {
+
+
+
+    display: flex;
+
+}
+
+
+
+
+
+.boton-eliminar-columna:hover {
+
+
+
+    background: #f1f5f9;
+
+
+
+    color: #ef4444;
+
+
+
+    opacity: 1;
+
+
+
+    transform: scale(1.08);
+
+}
+
+
+
+
+
+/* =====================================================
+
+   BOTÓN AGREGAR COLUMNA
+
+   ===================================================== */
+
+
+
+.controles-columnas {
+
+
+
+    display: flex;
+
+
+
+    align-items: center;
+
+
+
+    gap: 10px;
+
+
+
+    margin-top: 5px;
+
+}
+
+
+
+
+
+.boton-agregar-columna {
+
+
+
+    background: #16a34a;
+
+
+
+    color: white;
+
+
+
+    margin: 0;
+
+
+
+    padding:
+
+        9px 15px;
+
+}
+
+
+
+
+
+.boton-agregar-columna:hover {
+
+
+
+    background: #15803d;
+
+
+
+    opacity: 1;
+
+}
+
+
+
+
+
+/* =====================================================
+
+   FLECHAS DEL CARRUSEL
+
+   ===================================================== */
+
+
+
+.boton-carrusel {
+
+
+
+    width: 38px;
+
+
+
+    height: 38px;
+
+
+
+    min-width: 38px;
+
+
+
+    padding: 0;
+
+
+
+    margin: 0;
+
+
+
+    border-radius: 50%;
+
+
+
+    background: #2563eb;
+
+
+
+    color: white;
+
+
+
+    font-size: 20px;
+
+
+
+    line-height: 38px;
+
+
+
+    text-align: center;
+
+}
+
+
+
+
+
+.boton-carrusel:hover {
+
+
+
+    opacity: .88;
+
+}
+
+
+
+
+
+.boton-carrusel.oculto {
+
+
+
+    display: none;
+
+}
+
+
+
+
+
+/* =====================================================
+
+   BOTONES GENERALES
+
+   ===================================================== */
+
+
+
+button {
+
+
+
+    border: 0;
+
+
+
+    border-radius: 7px;
+
+
+
+    padding: 11px 18px;
+
+
+
+    cursor: pointer;
+
+
+
+    font-weight: bold;
+
+
+
+    margin:
+
+        5px 5px 5px 0;
+
+}
+
+
+
+
+
+.principal {
+
+
+
+    background: #2563eb;
+
+
+
+    color: white;
+
+}
+
+
+
+
+
+.verde {
+
+
+
+    background: #16a34a;
+
+
+
+    color: white;
+
+}
+
+
+
+
+
+.gris {
+
+
+
+    background: #6b7280;
+
+
+
+    color: white;
+
+}
+
+
+
+
+
+button:hover {
+
+
+
+    opacity: .88;
+
+}
+
+
+
+
+
+/* =====================================================
+
+   TABLA
+
+   ===================================================== */
+
+
+
+
+/* Controles discretos de deshacer y rehacer */
+.historial-controles {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 4px;
+    margin: 0 0 6px;
+}
+.historial-boton {
+    width: 30px;
+    height: 28px;
+    padding: 0;
+    margin: 0;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: transparent;
+    color: #6b7280;
+    font-size: 19px;
+    font-weight: normal;
+    line-height: 1;
+    cursor: pointer;
+    transition: background .16s ease, color .16s ease, border-color .16s ease;
+}
+.historial-boton:hover:not(:disabled) {
+    background: #f1f5f9;
+    color: #2563eb;
+    border-color: #cbd5e1;
+    opacity: 1;
+}
+.historial-boton:disabled { opacity: .35; cursor: not-allowed; }
+body.modo-oscuro .historial-boton { color: #cbd5e1; border-color: #475569; }
+body.modo-oscuro .historial-boton:hover:not(:disabled) {
+    background: #334155; color: #93c5fd; border-color: #64748b;
+}
+
+.tabla-contenedor {
+
+
+
+    overflow-x: auto;
+
+
+
+    margin-top: 15px;
+
+}
+
+
+
+
+
+table {
+
+
+
+    border-collapse: collapse;
+
+
+
+    width: 100%;
+
+
+
+    background: white;
+
+
+
+    transition:
+
+        background .25s ease;
+
+}
+
+
+
+
+
+th,
+
+td {
+
+
+
+    border:
+
+        1px solid #999;
+
+
+
+    padding: 9px;
+
+
+
+    text-align: left;
+
+}
+
+
+
+
+
+th {
+
+
+
+    background: #e5e7eb;
+
+
+
+    font-weight: bold;
+
+}
+
+
+
+
+
+#codigo {
+
+
+
+    min-height: 300px;
+
+
+
+    background: #111827;
+
+
+
+    color: #e5e7eb;
+
+
+
+    font-family:
+
+        Consolas,
+
+        monospace;
+
+}
+
+
+
+
+
+.nota {
+
+
+
+    background: #fff7ed;
+
+
+
+    border-left:
+
+        4px solid #f97316;
+
+
+
+    padding: 12px;
+
+
+
+    margin-top: 15px;
+
+
+
+    border-radius: 5px;
+
+}
+
+
+
+
+
+/* =====================================================
+
+   MODO OSCURO
+
+   ===================================================== */
+
+
+
+.boton-tema {
+
+
+
+    float: right;
+
+
+
+    background: #111827;
+
+
+
+    color: white;
+
+
+
+    padding:
+
+        9px 14px;
+
+
+
+    margin: 0;
+
+}
+
+
+
+
+
+body.modo-oscuro {
+
+
+
+    background: #0f172a;
+
+
+
+    color: #e5e7eb;
+
+}
+
+
+
+
+
+body.modo-oscuro .panel {
+
+
+
+    background: #1e293b;
+
+
+
+    box-shadow:
+
+        0 3px 12px rgba(0,0,0,.30);
+
+}
+
+
+
+
+
+body.modo-oscuro .descripcion {
+
+
+
+    color: #94a3b8;
+
+}
+
+
+
+
+
+body.modo-oscuro input,
+
+body.modo-oscuro textarea {
+
+
+
+    background: #0f172a;
+
+
+
+    color: #e5e7eb;
+
+
+
+    border-color: #475569;
+
+}
+
+
+
+
+
+body.modo-oscuro input::placeholder,
+
+body.modo-oscuro textarea::placeholder {
+
+
+
+    color: #64748b;
+
+}
+
+
+
+
+
+body.modo-oscuro table {
+
+
+
+    background: #1e293b;
+
+}
+
+
+
+
+
+body.modo-oscuro th,
+
+body.modo-oscuro td {
+
+
+
+    border-color: #475569;
+
+}
+
+
+
+
+
+body.modo-oscuro th {
+
+
+
+    background: #334155;
+
+
+
+    color: #f1f5f9;
+
+}
+
+
+
+
+
+body.modo-oscuro td {
+
+
+
+    background: #1e293b;
+
+
+
+    color: #e5e7eb;
+
+}
+
+
+
+
+
+body.modo-oscuro .boton-tema {
+
+
+
+    background: #f8fafc;
+
+
+
+    color: #111827;
+
+}
+
+
+
+
+
+body.modo-oscuro .footer {
+
+
+
+    background: #020617;
+
+
+
+    color: #94a3b8;
+
+}
+
+
+
+
+
+body.modo-oscuro
+
+.panel p[style*="color:#666"] {
+
+
+
+    color:
+
+        #94a3b8 !important;
+
+}
+
+
+
+
+
+body.modo-oscuro
+
+#vistaPrevia p[style*="color:#777"] {
+
+
+
+    color:
+
+        #94a3b8 !important;
+
+}
+
+
+
+
+
+
+
+
+
+/* =====================================================
+
+   BOTÓN ELIMINAR EN MODO OSCURO
+
+   ===================================================== */
+
+
+
+body.modo-oscuro
+
+.boton-eliminar-columna {
+
+
+
+    color: #64748b;
+
+}
+
+
+
+
+
+body.modo-oscuro
+
+.boton-eliminar-columna:hover {
+
+
+
+    background: #334155;
+
+
+
+    color: #f87171;
+
+}
+
+
+
+
+
+/* =====================================================
+
+   SELECCIÓN DE CELDAS
+
+   ===================================================== */
+
+
+
+#vistaPrevia td.celda-seleccionada,
+
+#vistaPrevia th.celda-seleccionada {
+
+
+
+    background:
+
+        #bfdbfe !important;
+
+
+
+    outline:
+
+        2px solid #2563eb;
+
+
+
+    outline-offset: -2px;
+
+}
+
+
+
+
+
+body.modo-oscuro
+
+#vistaPrevia td.celda-seleccionada,
+
+
+
+body.modo-oscuro
+
+#vistaPrevia th.celda-seleccionada {
+
+
+
+    background:
+
+        #334e68 !important;
+
+
+
+    outline:
+
+        2px solid #5b8db8;
+
+
+
+    outline-offset: -2px;
+
+}
+
+
+
+
+
+/* =====================================================
+
+   MENÚ COMBINAR
+
+   ===================================================== */
+
+
+
+#menuCombinar {
+
+
+
+    display: none;
+
+
+
+    position: fixed;
+
+
+
+    z-index: 9999;
+
+
+
+    background: white;
+
+
+
+    border:
+
+        1px solid #ccc;
+
+
+
+    border-radius: 8px;
+
+
+
+    box-shadow:
+
+        0 4px 15px rgba(0,0,0,.18);
+
+
+
+    padding: 6px;
+
+}
+
+
+
+
+
+#menuCombinar button {
+
+
+
+    margin: 0;
+
+
+
+    background: #2563eb;
+
+
+
+    color: white;
+
+
+
+    white-space: nowrap;
+
+}
+
+
+
+
+
+body.modo-oscuro #menuCombinar {
+
+
+
+    background: #1e293b;
+
+
+
+    border-color: #475569;
+
+
+
+    box-shadow:
+
+        0 4px 15px rgba(0,0,0,.45);
+
+}
+
+
+
+
+
+/* =====================================================
+
+   FOOTER
+
+   ===================================================== */
+
+
+
+.footer {
+
+
+
+    margin-top: 30px;
+
+
+
+    background: #111827;
+
+
+
+    color: #d1d5db;
+
+
+
+    text-align: center;
+
+
+
+    padding: 20px;
+
+
+
+    font-size: 14px;
+
+
+
+    border-radius:
+
+        12px 12px 0 0;
+
+
+
+    transition:
+
+        background .25s ease,
+
+        color .25s ease;
+
+}
+
+
+
+/* =====================================================
+
+   BARRAS DE DESPLAZAMIENTO MINIMALISTAS
+
+   ===================================================== */
+
+
+
+/* Firefox: barra discreta en ambos temas */
+
+
+
+/* Chrome, Electron y navegadores basados en Chromium */
+
+
+
+/* Barra horizontal de encabezados */
+
+
+
+
+
+/* Los colores de ambas barras se controlan mediante las variables
+   --scroll-indicador, --scroll-pista y --scroll-hover.
+   Así cambian automáticamente al alternar entre modo claro y oscuro. */
+
+/* RESTABLECER CARRUSEL CUANDO NO SE NECESITA */
+
+.boton-carrusel.oculto {
+    display: none !important;
+}
+
+.encabezados-scroll {
+    min-width: 0;
+    flex: 1;
+}
+
+
+/* ESTADO DEL CARRUSEL */
+
+.encabezados-wrapper.sin-desplazamiento #flechaIzquierda,
+.encabezados-wrapper.sin-desplazamiento #flechaDerecha {
+    display: none !important;
+}
+
+.encabezados-wrapper.sin-desplazamiento > div:first-child {
+    gap: 0 !important;
+}
+
+.encabezados-wrapper.con-desplazamiento #flechaIzquierda,
+.encabezados-wrapper.con-desplazamiento #flechaDerecha {
+    display: flex;
+}
+
+
+
+/* RESTAURAR POSICIÓN DE LAS FLECHAS DEL CARRUSEL */
+
+.boton-carrusel {
+    flex: 0 0 38px !important;
+
+    width: 38px;
+    min-width: 38px;
+    max-width: 38px;
+    height: 38px;
+
+    padding: 0 !important;
+    margin: 0 !important;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 24px;
+    line-height: 1;
+
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.boton-carrusel.oculto {
+    display: none !important;
+}
+
+
+
+
+</style>
+
+
+
+<style>
+
+/* =====================================================
+
+   BARRA SUPERIOR Y DESPLAZAMIENTO ADAPTABLE AL TEMA
+
+   ===================================================== */
+
+
+
+/* MODO CLARO */
+
+:root {
+
+    color-scheme: light;
+
+
+
+    --barra-fondo: #ffffff;
+
+    --barra-borde: #e5e7eb;
+
+    --barra-texto: #242424;
+
+    --barra-hover: #eeeeee;
+
+    --barra-icono: #333333;
+
+
+
+    --scroll-fondo: #f4f4f5;
+
+    --scroll-pista: #f1f1f1;
+
+    --scroll-indicador: #b8b8b8;
+
+    --scroll-hover: #858585;
+
+}
+
+
+
+/* MODO OSCURO */
+
+body.modo-oscuro {
+
+    color-scheme: dark;
+
+
+
+    --barra-fondo: #181818;
+
+    --barra-borde: rgba(255, 255, 255, 0.07);
+
+    --barra-texto: #f5f5f5;
+
+    --barra-hover: rgba(255, 255, 255, 0.09);
+
+    --barra-icono: #eeeeee;
+
+
+
+    --scroll-fondo: #181818;
+
+    --scroll-pista: #181818;
+
+    --scroll-indicador: #505050;
+
+    --scroll-hover: #808080;
+
+}
+
+
+
+
+/* =====================================================
+
+   BARRA SUPERIOR
+
+   ===================================================== */
+
+
+
+#trpp-titlebar {
+
+    height: 36px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: flex-end;
+
+    padding: 0;
+
+    background: var(--barra-fondo);
+
+    color: var(--barra-texto);
+
+    border-bottom: 1px solid var(--barra-borde);
+
+    user-select: none;
+
+    -webkit-app-region: drag;
+
+
+
+    /* Barra superior fija */
+
+    position: fixed;
+
+    top: 0;
+
+    left: 0;
+
+    right: 0;
+
+    width: 100%;
+
+    z-index: 99999;
+
+
+
+    transition:
+
+        background-color .2s ease,
+
+        color .2s ease,
+
+        border-color .2s ease;
+
+}
+
+/* Controles de ventana */
+
+#trpp-titlebar .trpp-controles {
+    display: flex;
+    align-items: stretch;
+    justify-content: flex-end;
+
+    gap: 0;
+    height: 36px;
+
+    -webkit-app-region: no-drag;
+
+    margin-left: auto;
+    margin-right: 0;
+
+    position: absolute;
+    top: 0;
+    right: 0;
+
+    flex-shrink: 0;
+    z-index: 999999;
+}
+
+
+
+/* Botones minimalistas */
+
+.trpp-luz {
+
+    width: 46px;
+
+    min-width: 46px;
+
+    height: 36px;
+
+    margin: 0;
+
+    padding: 0;
+
+    border: none;
+
+    border-radius: 0;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    color: var(--barra-icono);
+
+    background: transparent;
+
+    cursor: default;
+
+    box-shadow: none;
+
+    opacity: 1;
+
+    transition:
+        background-color .18s ease,
+        color .18s ease,
+        opacity .18s ease;
+
+    -webkit-app-region: no-drag;
+
+}
+
+
+
+.trpp-luz:hover {
+
+    background: var(--barra-hover);
+
+    color: var(--barra-icono);
+
+    opacity: 1;
+
+}
+
+.trpp-luz:focus-visible {
+    outline: 1px solid var(--barra-icono);
+    outline-offset: -3px;
+}
+
+/* Símbolos de los botones */
+
+.trpp-luz svg {
+
+    display: block;
+
+    width: 14px;
+
+    height: 14px;
+
+    stroke: currentColor;
+
+    stroke-width: 1.25;
+
+    fill: none;
+
+    stroke-linecap: round;
+
+    stroke-linejoin: round;
+
+    pointer-events: none;
+
+}
+
+
+
+/* Colores uniformes en ambos temas */
+
+.trpp-minimizar,
+
+.trpp-maximizar,
+
+.trpp-cerrar {
+
+    color: var(--barra-icono);
+
+    background: transparent;
+
+}
+
+
+
+/* Cerrar: rojo al pasar el cursor */
+
+.trpp-cerrar:hover {
+
+    background: #c93636;
+
+    color: #ffffff;
+
+}
+
+
+
+/* Título centrado */
+
+#trpp-titlebar .trpp-titulo {
+
+    position: absolute;
+
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    font: 400 12px/1 "Segoe UI", Arial, sans-serif;
+
+    letter-spacing: .15px;
+
+    color: var(--barra-texto);
+
+    white-space: nowrap;
+
+    pointer-events: none;
+
+}
+
+
+
+/* =====================================================
+
+   BARRAS DE DESPLAZAMIENTO
+
+   ===================================================== */
+
+
+
+/* Firefox y navegadores compatibles */
+
+html,
+
+body,
+
+.encabezados-scroll,
+
+textarea,
+
+#codigo {
+
+    scrollbar-width: thin;
+
+    scrollbar-color:
+
+        var(--scroll-indicador)
+
+        var(--scroll-pista);
+
+}
+
+
+
+/* Chromium / Electron: tamaño */
+
+/* Solamente barras verticales */
+::-webkit-scrollbar:vertical {
+    width: 8px;
+}
+
+/* Solamente barras horizontales */
+::-webkit-scrollbar:horizontal {
+    height: 8px;
+}
+
+
+
+/* Fondo de las barras */
+
+::-webkit-scrollbar-track {
+
+    background-color: var(--scroll-pista) !important;
+
+}
+
+
+
+/* Indicador desplazable */
+
+/* Indicador de la barra vertical */
+::-webkit-scrollbar-thumb:vertical {
+    background-color: var(--scroll-indicador) !important;
+    border: 2px solid var(--scroll-pista) !important;
+    border-radius: 10px;
+}
+
+/* Indicador de la barra horizontal */
+::-webkit-scrollbar-thumb:horizontal {
+    background-color: var(--scroll-indicador) !important;
+    border: 2px solid var(--scroll-pista) !important;
+    border-radius: 10px;
+}
+
+
+
+/* Indicador al pasar el cursor */
+
+::-webkit-scrollbar-thumb:vertical:hover {
+    background-color: var(--scroll-hover) !important;
+}
+
+
+/* Esquinas entre barras */
+
+::-webkit-scrollbar-corner {
+
+    background-color: var(--scroll-fondo) !important;
+
+}
+
+
+
+/* Barra horizontal de los encabezados */
+
+.encabezados-scroll::-webkit-scrollbar {
+
+    height: 6px;
+
+}
+
+
+
+.encabezados-scroll::-webkit-scrollbar-thumb {
+
+    border: 0 !important;
+
+    border-radius: 10px;
+
+}
+
+
+
+/* =====================================================
+
+   ACCESIBILIDAD
+
+   ===================================================== */
+
+
+
+.trpp-luz:focus-visible {
+
+    outline: 1px solid #8ab4f8;
+
+    outline-offset: -3px;
+
+}
+
+
+
+@media (prefers-reduced-motion: reduce) {
+
+    .trpp-luz,
+
+    #trpp-titlebar {
+
+        transition: none;
+
+    }
+
+}
+
+
+
+/* =========================================
+   BARRA VERTICAL PRINCIPAL
+   NO MODIFICAR CARRUSEL HORIZONTAL
+========================================= */
+
+body {
+    /* Solo la barra vertical principal; colores adaptables al tema. */
+    scrollbar-color: var(--scroll-indicador) var(--scroll-pista);
+    scrollbar-width: thin;
+}
+
+/* Chromium / Electron: solo la barra vertical del body. */
+body::-webkit-scrollbar:vertical {
+    width: 7px !important;
+}
+
+body::-webkit-scrollbar-track:vertical {
+    background: var(--scroll-pista) !important;
+}
+
+body::-webkit-scrollbar-thumb:vertical {
+    background: var(--scroll-indicador) !important;
+    border: 2px solid var(--scroll-pista) !important;
+    border-radius: 10px !important;
+}
+
+body::-webkit-scrollbar-thumb:vertical:hover {
+    background: var(--scroll-hover) !important;
+}
+
+
+
+
+/* =====================================================
+   TABLASRPP 1.1.1 — NOTIFICACIONES
+   ===================================================== */
+
+#trpp-notificaciones {
+    position: fixed;
+    top: 50px;
+    right: 22px;
+    z-index: 1000000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+}
+
+.trpp-toast {
+    min-width: 270px;
+    max-width: 380px;
+    padding: 14px 17px;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #1f2937;
+    box-shadow: 0 8px 30px rgba(0,0,0,.16);
+    border-left: 4px solid #2563eb;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    animation: toastEntrada .3s ease forwards;
+}
+
+.trpp-toast.exito { border-color: #16a34a; }
+.trpp-toast.error { border-color: #ef4444; }
+.trpp-toast.aviso { border-color: #f59e0b; }
+
+.trpp-toast.saliendo {
+    animation: toastSalida .25s ease forwards;
+}
+
+.trpp-toast-icono {
+    font-size: 19px;
+}
+
+@keyframes toastEntrada {
+    from { opacity: 0; transform: translateX(25px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes toastSalida {
+    to { opacity: 0; transform: translateX(25px); }
+}
+
+body.modo-oscuro .trpp-toast {
+    background: #1e293b;
+    color: #f1f5f9;
+    box-shadow: 0 8px 30px rgba(0,0,0,.4);
+}
+
+
+/* Menús y diálogos de proyectos: minimalistas y adaptados al tema */
+.trpp-menu-contextual{position:fixed;z-index:1000002;min-width:165px;padding:5px;background:#fff;color:#1f2937;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 12px 35px rgba(0,0,0,.18);display:none}
+.trpp-menu-contextual.visible{display:block;animation:toastEntrada .14s ease}
+.trpp-menu-contextual button{display:flex;align-items:center;gap:9px;width:100%;margin:0;padding:9px 11px;border:0;border-radius:7px;background:transparent;color:inherit;text-align:left;font-size:12px}
+.trpp-menu-contextual button:hover{background:#f1f5f9}
+.trpp-menu-contextual button.danger{color:#dc2626}
+body.modo-oscuro .trpp-menu-contextual{background:#1e293b;color:#e2e8f0;border-color:#475569}
+body.modo-oscuro .trpp-menu-contextual button:hover{background:#334155}
+.trpp-dialogo-texto{width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;color:#1f2937;font:inherit;font-size:13px;outline:none}
+.trpp-dialogo-texto:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.13)}
+body.modo-oscuro .trpp-dialogo-texto{background:#0f172a;color:#f1f5f9;border-color:#475569}
+.trpp-boton-secundario{background:#e2e8f0!important;color:#334155!important}
+.trpp-boton-peligro{background:#dc2626!important;color:#fff!important}
+body.modo-oscuro .trpp-boton-secundario{background:#334155!important;color:#e2e8f0!important}
+
+/* =====================================================
+   MODALES
+   ===================================================== */
+
+.trpp-modal-fondo {
+    position: fixed;
+    inset: 0;
+    z-index: 999998;
+    background: rgba(0,0,0,.48);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    visibility: hidden;
+    transition: .2s ease;
+}
+
+.trpp-modal-fondo.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.trpp-modal {
+    width: 100%;
+    max-width: 440px;
+    max-height: 85vh;
+    overflow-y: auto;
+    background: #ffffff;
+    color: #1f2937;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 15px 50px rgba(0,0,0,.25);
+    transform: translateY(12px) scale(.98);
+    transition: .2s ease;
+}
+
+.trpp-modal-fondo.visible .trpp-modal {
+    transform: translateY(0) scale(1);
+}
+
+body.modo-oscuro .trpp-modal {
+    background: #1e293b;
+    color: #e5e7eb;
+}
+
+.trpp-modal h2 {
+    margin: 0 0 8px;
+}
+
+.trpp-modal-descripcion {
+    color: #64748b;
+    font-size: 13px;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+body.modo-oscuro .trpp-modal-descripcion {
+    color: #94a3b8;
+}
+
+.trpp-modal-seccion {
+    padding: 13px 0;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+body.modo-oscuro .trpp-modal-seccion {
+    border-color: #475569;
+}
+
+.trpp-ajuste {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.trpp-ajuste input,
+.trpp-ajuste select {
+    accent-color: #2563eb;
+    width: auto;
+}
+
+.trpp-modal-acciones {
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 20px;
+}
+
+.trpp-modal-acciones button {
+    margin: 0;
+}
+
+.trpp-logo-about {
+    width: 68px;
+    height: 68px;
+    border-radius: 17px;
+    margin: 0 auto 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg,#2563eb,#1d4ed8);
+    color: white;
+    font-size: 32px;
+    box-shadow: 0 8px 20px rgba(37,99,235,.3);
+}
+
+.trpp-about {
+    text-align: center;
+}
+
+.trpp-about-version {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 20px;
+    background: #dbeafe;
+    color: #1d4ed8;
+    font-size: 12px;
+    font-weight: bold;
+    margin: 8px 0 15px;
+}
+
+body.modo-oscuro .trpp-about-version {
+    background: #334e68;
+    color: #bfdbfe;
+}
+
+.trpp-modal button:focus-visible {
+    outline: 2px solid #60a5fa;
+    outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .trpp-toast,
+    .trpp-modal,
+    .trpp-modal-fondo {
+        animation: none;
+        transition: none;
+    }
+}
+
+
+/* BARRA LATERAL DESPLEGABLE */
+
+
+/* =========================================
+   SIDEBAR TABLASRPP
+   EXPANSIÓN EXCLUSIVAMENTE POR HOVER
+========================================= */
+
+#trpp-sidebar {
+    position: fixed;
+    top: 50px;
+    left: 12px;
+    bottom: 12px;
+
+    width: 64px;
+    padding: 9px;
+
+    background: var(--barra-fondo);
+    border: 1px solid var(--barra-borde);
+    border-radius: 14px;
+
+    box-shadow: 0 5px 25px rgba(0,0,0,.12);
+
+    z-index: 99990;
+    overflow: hidden;
+
+    transition: width .25s ease;
+}
+
+#trpp-sidebar:hover {
+    width: 205px;
+}
+
+#trpp-sidebar button {
+    width: 100%;
+    height: 42px;
+    margin: 0 0 5px;
+    padding: 0 10px;
+
+    display: flex;
+    align-items: center;
+    gap: 13px;
+
+    border-radius: 9px;
+    background: transparent;
+    color: #334155;
+
+    white-space: nowrap;
+    text-align: left;
+    font-size: 13px;
+}
+
+#trpp-sidebar button:hover {
+    background: #eff6ff;
+    color: #2563eb;
+    opacity: 1;
+}
+
+/* El botón de menú no necesita interacción */
+#trpp-sidebar-toggle {
+    pointer-events: none;
+}
+
+.sidebar-icono {
+    min-width: 20px;
+    text-align: center;
+    font-size: 18px;
+}
+
+.sidebar-opciones {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.sidebar-opciones button span:first-child {
+    min-width: 20px;
+    text-align: center;
+    font-size: 17px;
+}
+
+.sidebar-texto {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .15s ease;
+}
+
+#trpp-sidebar:hover .sidebar-texto {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Modo oscuro */
+body.modo-oscuro #trpp-sidebar {
+    background: #1e293b;
+    border-color: #475569;
+}
+
+body.modo-oscuro #trpp-sidebar button {
+    color: #e2e8f0;
+}
+
+body.modo-oscuro #trpp-sidebar button:hover {
+    background: #334155;
+    color: #93c5fd;
+}
+
+body.modo-oscuro .sidebar-opciones {
+    border-color: #475569;
+}
+
+/* Ventanas pequeñas */
+@media (max-width: 600px) {
+    #trpp-sidebar {
+        top: 45px;
+        left: 6px;
+        width: 52px;
+    }
+
+    #trpp-sidebar:hover {
+        width: 190px;
+    }
+}
+
+
+
+/* =========================================
+   HISTORIAL DE TABLAS / PROYECTOS
+========================================= */
+.trpp-proyectos {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #e5e7eb;
+    max-height: calc(100% - 145px);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+.trpp-proyectos-cabecera {
+    padding: 2px 5px;
+    color: #64748b;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    white-space: nowrap;
+}
+#trpp-nueva-tabla {
+    flex: 0 0 40px;
+    height: 40px !important;
+    margin: 0 !important;
+    background: #2563eb !important;
+    color: #fff !important;
+    font-weight: 600;
+}
+#trpp-nueva-tabla:hover { background: #1d4ed8 !important; }
+.trpp-lista-tablas {
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding-right: 2px;
+}
+.trpp-proyecto-fila {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    min-width: 0;
+    border-radius: 8px;
+}
+.trpp-proyecto-fila.activo { background: rgba(37,99,235,.12); }
+#trpp-sidebar .trpp-proyecto-abrir {
+    flex: 1 1 auto;
+    min-width: 0;
+    width: auto;
+    height: 38px;
+    margin: 0;
+    padding: 0 7px;
+    gap: 8px;
+    color: #334155;
+    font-size: 12px;
+}
+.trpp-proyecto-abrir .trpp-proyecto-icono {
+    flex: 0 0 20px;
+    text-align: center;
+    font-size: 15px;
+}
+.trpp-proyecto-nombre {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+#trpp-sidebar .trpp-proyecto-borrar {
+    flex: 0 0 27px;
+    width: 27px;
+    height: 28px;
+    margin: 0 3px 0 0;
+    padding: 0;
+    justify-content: center;
+    color: #94a3b8;
+    font-size: 14px;
+}
+#trpp-sidebar .trpp-proyecto-borrar:hover {
+    color: #ef4444;
+    background: rgba(239,68,68,.10);
+}
+.trpp-proyectos-vacio {
+    padding: 7px 5px;
+    color: #94a3b8;
+    font-size: 11px;
+    line-height: 1.4;
+}
+.trpp-guardado {
+    padding: 3px 5px 0;
+    color: #94a3b8;
+    font-size: 10px;
+    white-space: nowrap;
+}
+#trpp-sidebar:not(:hover) .trpp-proyectos-cabecera,
+#trpp-sidebar:not(:hover) .trpp-proyecto-nombre,
+#trpp-sidebar:not(:hover) .trpp-proyecto-borrar,
+#trpp-sidebar:not(:hover) .trpp-proyectos-vacio,
+#trpp-sidebar:not(:hover) .trpp-guardado { display: none; }
+#trpp-sidebar:not(:hover) .trpp-proyectos { border-top-color: transparent; }
+#trpp-sidebar:not(:hover) .trpp-proyecto-fila { justify-content: center; }
+#trpp-sidebar:not(:hover) .trpp-proyecto-abrir { justify-content: center; padding: 0; }
+#trpp-sidebar:not(:hover) #trpp-nueva-tabla {
+    justify-content: center;
+    padding: 0;
+    gap: 0;
+}
+/* Mantener visible el símbolo + con la barra lateral contraída. */
+#trpp-sidebar #trpp-nueva-tabla .sidebar-icono {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 20px;
+    min-width: 20px;
+    width: 20px;
+    opacity: 1 !important;
+    visibility: visible !important;
+    color: inherit;
+}
+#trpp-sidebar:not(:hover) #trpp-nueva-tabla .sidebar-texto {
+    display: none;
+}
+body.modo-oscuro .trpp-proyectos { border-color: #475569; }
+body.modo-oscuro .trpp-proyectos-cabecera { color: #94a3b8; }
+body.modo-oscuro #trpp-sidebar .trpp-proyecto-abrir { color: #e2e8f0; }
+body.modo-oscuro .trpp-proyecto-fila.activo { background: rgba(59,130,246,.20); }
+body.modo-oscuro .trpp-proyectos-vacio,
+body.modo-oscuro .trpp-guardado { color: #94a3b8; }
+.trpp-lista-tablas::-webkit-scrollbar { width: 4px; }
+.trpp-lista-tablas::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; }
+body.modo-oscuro .trpp-lista-tablas::-webkit-scrollbar-thumb { background: #475569; }
+
+/* =========================================
+   SWITCHES MODERNOS TABLASRPP
+========================================= */
+
+.trpp-switch {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    width: 44px;
+    height: 24px;
+    flex-shrink: 0;
+    margin: 0;
+}
+
+.trpp-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+}
+
+.trpp-switch-slider {
+    position: absolute;
+    inset: 0;
+    cursor: pointer;
+    background: #cbd5e1;
+    border-radius: 30px;
+    transition: .25s ease;
+}
+
+.trpp-switch-slider::before {
+    content: "";
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    left: 3px;
+    top: 3px;
+    border-radius: 50%;
+    background: white;
+    box-shadow: 0 1px 4px rgba(0,0,0,.2);
+    transition: .25s ease;
+}
+
+.trpp-switch input:checked + .trpp-switch-slider {
+    background: #2563eb;
+}
+
+.trpp-switch input:checked + .trpp-switch-slider::before {
+    transform: translateX(20px);
+}
+
+.trpp-switch input:focus-visible + .trpp-switch-slider {
+    outline: 2px solid #60a5fa;
+    outline-offset: 3px;
+}
+
+body.modo-oscuro .trpp-switch-slider {
+    background: #475569;
+}
+
+body.modo-oscuro .trpp-switch input:checked + .trpp-switch-slider {
+    background: #3b82f6;
+}
+
+
+/* =========================================
+   SIDEBAR ADAPTABLE A MODO VENTANA
+========================================= */
+
+/* Expandir únicamente al pasar el cursor */
+#trpp-sidebar:hover {
+    width: 205px;
+}
+
+/* No modificar el margen ni la posición del contenido */
+.contenedor {
+    width: calc(100% - 40px);
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 0 20px;
+}
+
+/* Ocultar textos hasta expandir */
+#trpp-sidebar .sidebar-texto {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .15s ease;
+}
+
+#trpp-sidebar:hover .sidebar-texto {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Adaptación a ventanas pequeñas */
+@media (max-width: 600px) {
+    #trpp-sidebar {
+        top: 45px;
+        left: 6px;
+        width: 52px;
+    }
+
+    #trpp-sidebar:hover {
+        width: 190px;
+    }
+}
+
+
+
+
+/* =========================================
+   TABLASRPP - DETECCIÓN DE INTERFERENCIA
+========================================= */
+
+.contenedor {
+    transition:
+        width .25s ease,
+        margin-left .25s ease;
+}
+
+
+</style>
+
+
+
+</head>
+
+
+
+
+
+<body>
+
+<!-- PANTALLA DE CARGA (SPLASH SCREEN) -->
+    <div id="pantalla-carga">
+        <div class="splash-logo-container">
+            <div class="splash-icono">
+                <svg viewBox="0 0 24 24">
+                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                    <path d="M3 9h18M3 15h18M9 3v18" />
+                </svg>
+            </div>
+            <h2 class="splash-titulo">TablasRPP</h2>
+            <p class="splash-subtitulo">Generador de Tablas HTML</p>
+            <div class="splash-spinner"></div>
+        </div>
+    </div>
+
+    <div id="trpp-titlebar">
+
+    <div class="trpp-controles">
+
+
+
+        <!-- Minimizar -->
+
+        <button
+
+            class="trpp-luz trpp-minimizar"
+
+            type="button"
+
+            aria-label="Minimizar ventana"
+
+            title="Minimizar"
+
+            onclick="window.tablasRPPWindow?.minimize()">
+
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M3 8H13"/>
+            </svg>
+
+        </button>
+
+
+
+        
+<!-- Maximizar / Restaurar -->
+<button
+    class="trpp-luz trpp-maximizar"
+    type="button"
+    aria-label="Maximizar"
+    title="Maximizar"
+    onclick="window.tablasRPPWindow?.toggleMaximize()">
+
+    <svg id="iconoMaximizar" viewBox="0 0 16 16" aria-hidden="true">
+        <rect x="3" y="3" width="10" height="10" rx="1.15"/>
+    </svg>
+
+</button>
+
+
+
+
+        <!-- Cerrar -->
+
+        <button
+
+            class="trpp-luz trpp-cerrar"
+
+            type="button"
+
+            aria-label="Cerrar ventana"
+
+            title="Cerrar"
+
+            onclick="window.tablasRPPWindow?.close()">
+
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M4.25 4.25L11.75 11.75M11.75 4.25L4.25 11.75"/>
+            </svg>
+
+        </button>
+
+
+
+    </div>
+
+
+
+    <div class="trpp-titulo">TablasRPP</div>
+
+    
+
+</div>
+
+
+
+
+
+<div class="contenedor">
+
+
+
+
+
+<!-- =====================================================
+
+     BOTÓN DE TEMA
+
+     ===================================================== -->
+
+
+
+
+<!-- BARRA LATERAL -->
+<aside id="trpp-sidebar">
+    <button id="trpp-sidebar-toggle"
+            type="button"
+            aria-label="Abrir menú"
+            aria-expanded="false"
+            title="Menú">
+        <span class="sidebar-icono">☰</span>
+        <span class="sidebar-texto">Menú</span>
+    </button>
+
+    <section class="trpp-proyectos" aria-label="Mis tablas">
+        <button id="trpp-nueva-tabla" type="button" title="Crear una tabla nueva">
+            <span class="sidebar-icono">＋</span>
+            <span class="sidebar-texto">Nueva tabla</span>
+        </button>
+        <div class="trpp-proyectos-cabecera">MIS TABLAS</div>
+        <div id="trpp-lista-tablas" class="trpp-lista-tablas"></div>
+        <div id="trpp-estado-guardado" class="trpp-guardado">Guardado automáticamente</div>
+    </section>
+
+    <div class="sidebar-opciones">
+        <button type="button" onclick="abrirConfiguracion()">
+            <span>⚙️</span>
+            <span class="sidebar-texto">Configuración</span>
+        </button>
+
+        <button type="button" onclick="abrirAcercaDe()">
+            <span>ⓘ</span>
+            <span class="sidebar-texto">Acerca de</span>
+        </button>
+    </div>
+</aside>
+
+
+
+
+
+
+<h1>
+
+
+
+    Generador de Tablas HTML
+
+
+
+</h1>
+
+
+
+
+
+<p class="descripcion">
+
+
+
+    Pega los datos del PDF y genera automáticamente
+
+    una tabla HTML.
+
+
+
+</p>
+
+
+
+
+
+<!-- =====================================================
+
+     PANEL 1
+
+     ===================================================== -->
+
+
+
+<div class="panel">
+
+
+
+
+
+    <h2>
+
+
+
+        1. Encabezados
+
+
+
+    </h2>
+
+
+
+
+
+    <p style="color:#666;">
+
+
+
+        Si no necesitas una columna,
+
+        simplemente déjala vacía.
+
+
+
+    </p>
+
+
+
+
+
+    <!-- =================================================
+
+         CONTENEDOR DE COLUMNAS
+
+         ================================================= -->
+
+
+
+    <div class="encabezados-wrapper">
+
+
+
+
+
+        <div
+
+            style="
+
+                display:flex;
+
+                align-items:center;
+
+                gap:8px;
+
+            "
+
+        >
+
+
+
+
+
+            <button
+
+                id="flechaIzquierda"
+
+                class="boton-carrusel oculto"
+
+                onclick="moverColumnas(-1)"
+
+            >
+
+
+
+                ‹
+
+
+
+            </button>
+
+
+
+
+
+            <div
+
+                id="encabezadosScroll"
+
+                class="encabezados-scroll"
+
+            >
+
+
+
+
+
+                <div
+
+                    id="encabezados"
+
+                    class="encabezados"
+
+                >
+
+
+
+
+
+                    <div
+
+                        class="encabezado-columna"
+
+                        data-indice="0"
+
+                    >
+
+
+
+                        <label>
+
+                            Columna 1
+
+                        </label>
+
+
+
+                        <input
+
+                            id="col1"
+
+                            value="Código"
+
+                        >
+
+
+
+                    </div>
+
+
+
+
+
+                    <div
+
+                        class="encabezado-columna"
+
+                        data-indice="1"
+
+                    >
+
+
+
+                        <label>
+
+                            Columna 2
+
+                        </label>
+
+
+
+                        <input
+
+                            id="col2"
+
+                            value=""
+
+                        >
+
+
+
+                    </div>
+
+
+
+
+
+                    <div
+
+                        class="encabezado-columna"
+
+                        data-indice="2"
+
+                    >
+
+
+
+                        <label>
+
+                            Columna 3
+
+                        </label>
+
+
+
+                        <input
+
+                            id="col3"
+
+                            value=""
+
+                        >
+
+
+
+                    </div>
+
+
+
+
+
+                    <div
+
+                        class="encabezado-columna"
+
+                        data-indice="3"
+
+                    >
+
+
+
+                        <label>
+
+                            Columna 4
+
+                        </label>
+
+
+
+                        <input
+
+                            id="col4"
+
+                            value=""
+
+                        >
+
+
+
+                    </div>
+
+
+
+
+
+                    <div
+
+                        class="encabezado-columna"
+
+                        data-indice="4"
+
+                    >
+
+
+
+                        <label>
+
+                            Columna 5
+
+                        </label>
+
+
+
+                        <input
+
+                            id="col5"
+
+                            value=""
+
+                        >
+
+
+
+                    </div>
+
+
+
+
+
+                </div>
+
+
+
+            </div>
+
+
+
+
+
+            <button
+
+                id="flechaDerecha"
+
+                class="boton-carrusel"
+
+                onclick="moverColumnas(1)"
+
+            >
+
+
+
+                ›
+
+
+
+            </button>
+
+
+
+
+
+        </div>
+
+
+
+
+
+        <div class="controles-columnas">
+
+
+
+
+
+            <button
+
+                class="boton-agregar-columna"
+
+                onclick="agregarColumna()"
+
+            >
+
+
+
+                ＋ Agregar columna
+
+
+
+            </button>
+
+
+
+
+
+        </div>
+
+
+
+
+
+    </div>
+
+
+
+
+
+    <h2>
+
+
+
+        2. Datos del PDF
+
+
+
+    </h2>
+
+
+
+
+
+    <textarea
+
+        id="entrada"
+
+        placeholder="Pega aquí los datos copiados del PDF..."
+
+    ></textarea>
+
+
+
+
+
+    <button
+
+        class="principal"
+
+        onclick="generarTabla()"
+
+    >
+
+
+
+        Generar tabla
+
+
+
+    </button>
+
+
+
+
+
+    <button
+
+        class="gris"
+
+        onclick="limpiarTodo()"
+
+    >
+
+
+
+        Limpiar
+
+
+
+    </button>
+
+
+
+
+
+</div>
+
+
+
+
+
+<!-- =====================================================
+
+     PANEL 2
+
+     ===================================================== -->
+
+
+
+<div class="panel">
+
+
+
+
+
+    <h2>
+
+
+
+        3. Vista previa
+
+
+
+    </h2>
+
+
+
+
+
+    <div class="historial-controles" aria-label="Historial de combinaciones">
+        <button id="botonDeshacer" class="historial-boton" type="button"
+            onclick="deshacerCombinacion()" title="Deshacer combinación" aria-label="Deshacer" disabled>↶</button>
+        <button id="botonRehacer" class="historial-boton" type="button"
+            onclick="rehacerCombinacion()" title="Rehacer combinación" aria-label="Rehacer" disabled>↷</button>
+    </div>
+
+    <div
+
+        id="vistaPrevia"
+
+        class="tabla-contenedor"
+
+    >
+
+
+
+        <p style="color:#777;">
+
+
+
+            La tabla aparecerá aquí.
+
+
+
+        </p>
+
+
+
+    </div>
+
+
+
+
+
+</div>
+
+
+
+
+
+<!-- =====================================================
+
+     PANEL 3
+
+     ===================================================== -->
+
+
+
+<div class="panel">
+
+
+
+
+
+    <h2>
+
+
+
+        4. HTML generado
+
+
+
+    </h2>
+
+
+
+
+
+    <textarea
+
+        id="codigo"
+
+        readonly
+
+    ></textarea>
+
+
+
+
+
+    <br>
+
+
+
+
+
+    <button
+
+        class="verde"
+
+        onclick="copiarHTML()"
+
+    >
+
+
+
+        Copiar HTML
+
+
+
+    </button>
+
+
+
+
+
+    <button
+
+        class="gris"
+
+        onclick="descargarHTML()"
+
+    >
+
+
+
+        Descargar HTML
+
+
+
+    </button>
+
+
+
+
+
+</div>
+
+
+
+
+
+<!-- =====================================================
+
+     FOOTER
+
+     ===================================================== -->
+
+
+
+<footer class="footer">
+
+
+
+    TablasRPP 1.1.1 © 2026 Raapp Co.
+
+    Todos los derechos reservados.
+
+
+
+</footer>
+
+
+
+
+
+</div>
+
+
+
+
+
+<!-- =====================================================
+
+     MENÚ COMBINAR
+
+     ===================================================== -->
+
+
+
+<div id="menuCombinar">
+
+
+
+
+
+    <button
+
+        onclick="combinarCeldasSeleccionadas()"
+
+    >
+
+
+
+        Combinar celdas seleccionadas
+
+
+
+    </button>
+
+
+
+
+
+</div>
+
+
+
+<!-- NOTIFICACIONES -->
+<div id="trpp-notificaciones"
+     aria-live="polite"
+     aria-atomic="false"></div>
+
+<!-- MODAL CONFIGURACIÓN -->
+
+<div id="trpp-menu-proyecto" class="trpp-menu-contextual" role="menu" aria-label="Opciones de tabla">
+  <button type="button" data-menu-accion="renombrar">✎ <span>Renombrar</span></button>
+  <button type="button" data-menu-accion="eliminar" class="danger">⌫ <span>Eliminar tabla</span></button>
+</div>
+<div id="trpp-modal-proyecto" class="trpp-modal-fondo" aria-hidden="true">
+  <div class="trpp-modal" role="dialog" aria-modal="true" aria-labelledby="trpp-proyecto-titulo">
+    <h2 id="trpp-proyecto-titulo">Renombrar tabla</h2>
+    <p id="trpp-proyecto-descripcion" class="trpp-modal-descripcion">Escribe un nombre para identificar esta tabla.</p>
+    <input id="trpp-proyecto-nombre-input" class="trpp-dialogo-texto" maxlength="70" autocomplete="off">
+    <div class="trpp-modal-acciones">
+      <button type="button" id="trpp-proyecto-cancelar" class="trpp-boton-secundario">Cancelar</button>
+      <button type="button" id="trpp-proyecto-aceptar" class="principal">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div id="modalConfiguracion" class="trpp-modal-fondo"
+     onclick="cerrarModalFondo(event, 'modalConfiguracion')">
+
+    <div class="trpp-modal" role="dialog" aria-modal="true"
+         aria-labelledby="tituloConfiguracion">
+
+        <h2 id="tituloConfiguracion">⚙️ Configuración</h2>
+
+        <p class="trpp-modal-descripcion">
+            Personaliza el aspecto y comportamiento de TablasRPP.
+        </p>
+
+        
+<div class="trpp-modal-seccion">
+    <div class="trpp-ajuste">
+        <div>
+            <strong>Modo oscuro</strong>
+            <p>Activar apariencia oscura</p>
+        </div>
+
+        <label class="trpp-switch">
+            <input
+                type="checkbox"
+                id="ajusteTema"
+                onchange="guardarConfiguracion()"
+            >
+            <span class="trpp-switch-slider"></span>
+        </label>
+    </div>
+</div>
+
+<div class="trpp-modal-seccion">
+    <div class="trpp-ajuste">
+        <div>
+            <strong>Notificaciones</strong>
+            <p>Mostrar avisos animados</p>
+        </div>
+
+        <label class="trpp-switch">
+            <input
+                type="checkbox"
+                id="ajusteNotificaciones"
+                onchange="guardarConfiguracion()"
+            >
+            <span class="trpp-switch-slider"></span>
+        </label>
+    </div>
+</div>
+
+<div class="trpp-modal-seccion">
+    <div>
+        <strong>Tamaño de fuente</strong>
+        <p>Personaliza el tamaño del texto</p>
+    </div>
+
+    <select id="ajusteFuente" onchange="guardarConfiguracion()">
+        <option value="14px">Pequeño</option>
+        <option value="16px">Normal</option>
+        <option value="18px">Grande</option>
+        <option value="20px">Muy grande</option>
+    </select>
+</div>
+
+
+        <div class="trpp-modal-acciones">
+            <button class="gris"
+                    onclick="cerrarModal('modalConfiguracion')">
+                Cerrar
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL ACERCA DE -->
+<div id="modalAcercaDe" class="trpp-modal-fondo"
+     onclick="cerrarModalFondo(event, 'modalAcercaDe')">
+
+    <div class="trpp-modal trpp-about" role="dialog"
+         aria-modal="true" aria-labelledby="tituloAcerca">
+
+        <div class="trpp-logo-about">▦</div>
+
+        <h2 id="tituloAcerca">TablasRPP</h2>
+
+        <p class="trpp-modal-descripcion">
+            Generador de Tablas HTML
+        </p>
+
+        <span class="trpp-about-version">Versión 1.1.1</span>
+
+        <p>
+            Herramienta diseñada para facilitar
+            la conversión de datos PDF a tablas HTML.
+        </p>
+
+        <p class="trpp-modal-descripcion">
+            Desarrollado por Raapp.<br>
+            © 2026 Todos los derechos reservados.
+        </p>
+
+        <div class="trpp-modal-acciones">
+            <button class="principal"
+                    onclick="cerrarModal('modalAcercaDe')">
+                Entendido
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+
+let historialDeshacer = [];
+let historialRehacer = [];
+
+/* =========================================
+   BARRA LATERAL
+========================================= */
+
+
+
+/* =========================================
+   NOTIFICACIONES ANIMADAS
+========================================= */
+
+function notificar(mensaje, tipo = "aviso") {
+    const configuracion = JSON.parse(
+        localStorage.getItem("configTablasRPP") || "{}"
+    );
+
+    if (configuracion.notificaciones === false) return;
+
+    const contenedor = document.getElementById("trpp-notificaciones");
+    if (!contenedor) return;
+
+    const iconos = {
+        exito: "✓",
+        error: "✕",
+        aviso: "!"
+    };
+
+    const toast = document.createElement("div");
+    toast.className = "trpp-toast " + tipo;
+
+    const icono = document.createElement("span");
+    icono.className = "trpp-toast-icono";
+    icono.textContent = iconos[tipo] || "!";
+
+    const texto = document.createElement("span");
+    texto.textContent = mensaje;
+
+    toast.append(icono, texto);
+    contenedor.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.add("saliendo");
+
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+/* =========================================
+   CONFIGURACIÓN
+========================================= */
+
+function abrirConfiguracion() {
+    document.getElementById("modalConfiguracion")
+        .classList.add("visible");
+
+    document.getElementById("trpp-sidebar")
+        .classList.remove("expandida");
+}
+
+function abrirAcercaDe() {
+    document.getElementById("modalAcercaDe")
+        .classList.add("visible");
+
+    document.getElementById("trpp-sidebar")
+        .classList.remove("expandida");
+}
+
+function cerrarModal(id) {
+    document.getElementById(id).classList.remove("visible");
+}
+
+function cerrarModalFondo(event, id) {
+    if (event.target.id === id) {
+        cerrarModal(id);
+    }
+}
+
+
+function guardarConfiguracion() {
+    const configuracion = {
+        tema: document.getElementById("ajusteTema").checked,
+        fuente: document.getElementById("ajusteFuente").value,
+        notificaciones: document.getElementById("ajusteNotificaciones").checked
+    };
+
+    localStorage.setItem(
+        "configTablasRPP",
+        JSON.stringify(configuracion)
+    );
+
+    localStorage.setItem(
+        "temaRaapp",
+        configuracion.tema ? "oscuro" : "claro"
+    );
+
+    aplicarConfiguracion(configuracion);
+
+    notificar("Preferencias actualizadas.", "exito");
+}
+
+
+function aplicarConfiguracion(configuracion) {
+    document.body.classList.toggle("modo-oscuro", !!configuracion.tema);
+
+    document.body.style.fontSize = configuracion.fuente || "16px";
+
+    document.getElementById("ajusteTema").checked =
+        !!configuracion.tema;
+
+    document.getElementById("ajusteFuente").value =
+        configuracion.fuente || "16px";
+
+    document.getElementById("ajusteNotificaciones").checked =
+        configuracion.notificaciones !== false;
+}
+
+/* =========================================
+   RECUPERAR CONFIGURACIÓN
+========================================= */
+
+(function cargarConfiguracion() {
+    const configuracion = JSON.parse(
+        localStorage.getItem("configTablasRPP") || "{}"
+    );
+
+    const temaAnterior = localStorage.getItem("temaRaapp");
+
+    if (configuracion.tema === undefined) {
+        configuracion.tema = temaAnterior === "oscuro";
+    }
+
+    if (configuracion.fuente === undefined) {
+        configuracion.fuente = "16px";
+    }
+
+    if (configuracion.notificaciones === undefined) {
+        configuracion.notificaciones = true;
+    }
+
+    aplicarConfiguracion(configuracion);
+
+    localStorage.setItem(
+        "configTablasRPP",
+        JSON.stringify(configuracion)
+    );
+})();
+
+/* =========================================
+   CERRAR MODALES CON ESCAPE
+========================================= */
+
+document.addEventListener("keydown", function(event) {
+    if (event.key === "Escape") {
+        cerrarModal("modalConfiguracion");
+        cerrarModal("modalAcercaDe");
+    }
+});
+/*
+========================================================
+OCULTAR PANTALLA DE CARGA AL CARGAR LA APP
+========================================================
+*/
+window.addEventListener("load", function() {
+    setTimeout(function() {
+        const pantallaCarga = document.getElementById("pantalla-carga");
+
+        if (pantallaCarga) {
+            pantallaCarga.classList.add("ocultar");
+
+            setTimeout(() => {
+                pantallaCarga.remove();
+            }, 400);
+        }
+    }, 2000);
+});
+
+
+
+
+/*
+
+========================================================
+
+VARIABLE PARA CONTAR COLUMNAS
+
+========================================================
+
+*/
+
+
+
+let numeroColumnas =
+
+    5;
+
+
+
+
+
+/*
+
+========================================================
+
+MODO OSCURO
+
+========================================================
+
+*/
+
+
+
+function cambiarTema() {
+    const actual = JSON.parse(
+        localStorage.getItem("configTablasRPP") || "{}"
+    );
+
+    actual.tema = !document.body.classList.contains("modo-oscuro");
+
+    if (!actual.fuente) actual.fuente = "16px";
+    if (actual.notificaciones === undefined) actual.notificaciones = true;
+
+    localStorage.setItem("configTablasRPP", JSON.stringify(actual));
+    localStorage.setItem("temaRaapp", actual.tema ? "oscuro" : "claro");
+
+    aplicarConfiguracion(actual);
+}   
+
+
+
+
+
+/*
+
+========================================================
+
+CARGAR TEMA
+
+========================================================
+
+*/
+
+
+
+(function cargarTema() {
+
+    const tema = localStorage.getItem("temaRaapp");
+
+    if (tema === "oscuro") {
+        document.body.classList.add("modo-oscuro");
+    }
+
+})();
+
+
+
+
+
+/*
+
+========================================================
+
+AGREGAR COLUMNA
+
+========================================================
+
+*/
+
+
+
+function agregarColumna() {
+
+
+
+
+
+    numeroColumnas++;
+
+
+
+
+
+    const contenedor =
+
+        document.getElementById(
+
+            "encabezados"
+
+        );
+
+
+
+
+
+    const columna =
+
+        document.createElement(
+
+            "div"
+
+        );
+
+
+
+
+
+    columna.className =
+
+        "encabezado-columna adicional";
+
+
+
+
+
+    columna.dataset.indice =
+
+        numeroColumnas - 1;
+
+
+
+
+
+    columna.innerHTML = `
+
+
+
+        <label>
+
+            Columna ${numeroColumnas}
+
+        </label>
+
+
+
+        <input
+
+            id="col${numeroColumnas}"
+
+            value=""
+
+            placeholder="Encabezado..."
+
+        >
+
+
+
+        <button
+
+            class="boton-eliminar-columna"
+
+            title="Eliminar columna"
+
+            onclick="eliminarColumna(this)"
+
+        >
+
+            ×
+
+        </button>
+
+
+
+    `;
+
+
+
+
+
+    contenedor.appendChild(
+
+        columna
+
+    );
+    
+requestAnimationFrame(() => {
+    actualizarCarrusel();
+});
+
+    
+function restablecerDimensionesColumnas() {
+
+    const contenedor = document.getElementById("encabezados");
+    const scroll = document.getElementById("encabezadosScroll");
+
+    if (!contenedor || !scroll) return;
+
+    const columnas = contenedor.querySelectorAll(
+        ".encabezado-columna"
+    );
+
+    // Mantener siempre el ancho original de cada columna.
+    columnas.forEach(columna => {
+        columna.style.flex = "0 0 190px";
+        columna.style.width = "190px";
+        columna.style.minWidth = "190px";
+        columna.style.maxWidth = "190px";
+    });
+
+    // Recalcular después de actualizar el diseño.
+    requestAnimationFrame(() => {
+
+        actualizarCarrusel();
+
+        if (columnas.length === 5) {
+            scroll.scrollLeft = 0;
+        }
+
+    });
+}
+
+
+
+
+
+
+    setTimeout(
+
+        function() {
+
+
+
+
+
+            const scroll =
+
+                document.getElementById(
+
+                    "encabezadosScroll"
+
+                );
+
+
+
+
+
+            scroll.scrollTo({
+
+
+
+                left:
+
+                    scroll.scrollWidth,
+
+
+
+                behavior:
+
+                    "smooth"
+
+
+
+            });
+
+
+
+        },
+
+        50
+
+    );
+
+
+
+}
+
+
+
+
+
+/*
+
+========================================================
+
+ELIMINAR COLUMNA
+
+========================================================
+
+*/
+
+
+
+
+function eliminarColumna(boton) {
+
+    const columna = boton.closest(".encabezado-columna");
+
+    if (!columna) return;
+
+    if (numeroColumnas <= 5) return;
+
+    columna.remove();
+
+    numeroColumnas--;
+
+    const columnas = document.querySelectorAll(
+        "#encabezados .encabezado-columna"
+    );
+
+    columnas.forEach((columna, indice) => {
+
+        columna.dataset.indice = indice;
+
+        const label = columna.querySelector("label");
+        const input = columna.querySelector("input");
+
+        label.textContent = `Columna ${indice + 1}`;
+
+        input.id = `col${indice + 1}`;
+
+    });
+
+    const scroll = document.getElementById("encabezadosScroll");
+
+    // Si regresamos a las 5 columnas originales,
+    // volver completamente al estado inicial.
+    if (numeroColumnas === 5) {
+
+        scroll.scrollTo({
+            left: 0,
+            behavior: "instant"
+        });
+
+    }
+
+    // Esperar a que el navegador actualice las dimensiones.
+    requestAnimationFrame(() => {
+        actualizarCarrusel();
+    });
+
+}
+
+
+
+
+
+
+/*
+
+========================================================
+
+ACTUALIZAR CARRUSEL
+
+========================================================
+
+*/
+
+
+
+function actualizarCarrusel() {
+
+    const wrapper = document.querySelector(".encabezados-wrapper");
+    const scroll = document.getElementById("encabezadosScroll");
+    const izquierda = document.getElementById("flechaIzquierda");
+    const derecha = document.getElementById("flechaDerecha");
+
+    const columnas = document.querySelectorAll(
+        "#encabezados .encabezado-columna"
+    );
+
+    if (!wrapper || !scroll || !izquierda || !derecha) return;
+
+    // Con cinco columnas o menos, eliminar completamente las flechas.
+    if (columnas.length <= 5) {
+
+        wrapper.classList.remove("con-desplazamiento");
+        wrapper.classList.add("sin-desplazamiento");
+
+        izquierda.classList.add("oculto");
+        derecha.classList.add("oculto");
+
+        izquierda.style.opacity = "";
+        derecha.style.opacity = "";
+
+        scroll.scrollLeft = 0;
+
+        return;
+    }
+
+    // Con seis o más columnas, activar el carrusel.
+    wrapper.classList.remove("sin-desplazamiento");
+    wrapper.classList.add("con-desplazamiento");
+
+    izquierda.classList.remove("oculto");
+    derecha.classList.remove("oculto");
+
+    izquierda.style.opacity =
+        scroll.scrollLeft <= 5 ? "0.4" : "1";
+
+    derecha.style.opacity =
+        scroll.scrollLeft + scroll.clientWidth >=
+        scroll.scrollWidth - 5 ? "0.4" : "1";
+}
+
+
+
+/*
+
+========================================================
+
+MOVER CARRUSEL
+
+========================================================
+
+*/
+
+
+
+function moverColumnas(
+
+    direccion
+
+) {
+
+
+
+
+
+    const scroll =
+
+        document.getElementById(
+
+            "encabezadosScroll"
+
+        );
+
+
+
+
+
+    const cantidad =
+
+        210;
+
+
+
+
+
+    scroll.scrollBy({
+
+
+
+        left:
+
+            direccion *
+
+            cantidad,
+
+
+
+        behavior:
+
+            "smooth"
+
+
+
+    });
+
+
+
+}
+
+
+
+
+
+/*
+
+========================================================
+
+ACTUALIZAR AL HACER SCROLL
+
+========================================================
+
+*/
+
+
+
+document
+
+    .getElementById(
+
+        "encabezadosScroll"
+
+    )
+
+    .addEventListener(
+
+        "scroll",
+
+        actualizarCarrusel
+
+    );
+
+
+
+
+
+window.addEventListener(
+
+    "resize",
+
+    actualizarCarrusel
+
+);
+
+
+
+
+
+setTimeout(
+
+    actualizarCarrusel,
+
+    100
+
+);
+
+
+
+
+
+/*
+
+========================================================
+
+ESCAPAR HTML
+
+========================================================
+
+*/
+
+
+
+function escaparHTML(
+
+    texto
+
+) {
+
+
+
+
+
+    return texto
+
+
+
+        .replace(
+
+            /&/g,
+
+            "&amp;"
+
+        )
+
+
+
+        .replace(
+
+            /</g,
+
+            "&lt;"
+
+        )
+
+
+
+        .replace(
+
+            />/g,
+
+            "&gt;"
+
+        )
+
+
+
+        .replace(
+
+            /"/g,
+
+            "&quot;"
+
+        )
+
+
+
+        .replace(
+
+            /'/g,
+
+            "&#039;"
+
+        );
+
+
+
+}
+
+// Devuelve únicamente el HTML de la tabla, sin atributos de edición.
+function obtenerHTMLLimpio(tabla) {
+    if (!tabla) return "";
+    const copia = tabla.cloneNode(true);
+    const elementos = [copia, ...copia.querySelectorAll("*")];
+
+    elementos.forEach(elemento => {
+        elemento.removeAttribute("contenteditable");
+        elemento.removeAttribute("spellcheck");
+        elemento.removeAttribute("data-editing");
+        elemento.removeAttribute("data-selection");
+
+        Array.from(elemento.attributes).forEach(atributo => {
+            if (atributo.name.startsWith("data-")) elemento.removeAttribute(atributo.name);
+        });
+
+        if (elemento.classList) {
+            elemento.classList.remove("celda-seleccionada");
+            if (!elemento.classList.length) elemento.removeAttribute("class");
+        }
+    });
+    return copia.outerHTML;
+}
+
+
+
+
+
+/*
+
+========================================================
+
+DETECTAR COLUMNAS — TABLASRPP
+
+========================================================
+
+*/
+
+
+
+function detectarColumnas(linea, totalColumnas) {
+    const texto = String(linea ?? "").trim();
+    if (!texto) return [];
+    if (texto.includes("\t")) {
+        return texto.split("\t").map(valor => valor.trim());
+    }
+    if (/\s{2,}/.test(texto)) {
+        const partes = texto.split(/\s{2,}/).map(valor => valor.trim());
+        if (partes.length > 1) {
+            if (partes.length > totalColumnas) {
+                return partes.slice(0, totalColumnas - 1).concat(
+                    partes.slice(totalColumnas - 1).join(" ")
+                );
+            }
+            return partes;
+        }
+    }
+    // Los espacios simples se conservan dentro de las descripciones.
+    return [texto];
+}
+
+
+
+/*
+
+========================================================
+
+RECONSTRUIR FILAS DE TEXTO PLANO
+
+========================================================
+
+*/
+
+
+
+function reconstruirFilas(lineas, totalColumnas) {
+    const esNumero = valor =>
+        /^[+-]?(?:\d{1,3}(?:,\d{3})+|\d+)?(?:[.,]\d+)?(?:mm|cm|ml|kg|mg|g|%|°c)?$/i.test(valor) &&
+        /\d/.test(valor);
+
+    return lineas.map(linea => {
+        const separadas = detectarColumnas(linea, totalColumnas);
+        if (separadas.length > 1) {
+            const fila = separadas.slice(0, totalColumnas);
+            while (fila.length < totalColumnas) fila.push("");
+            return fila;
+        }
+
+        const texto = String(linea ?? "").trim();
+        if (!texto) return Array(totalColumnas).fill("");
+
+        const fila = Array(totalColumnas).fill("");
+        if (totalColumnas !== 5) {
+            fila[0] = texto;
+            return fila;
+        }
+
+        const palabras = texto.split(/\s+/);
+        if (palabras.length < 2) {
+            fila[0] = texto;
+            return fila;
+        }
+
+        const indicesNumericos = [];
+        for (let i = 1; i < palabras.length; i++) {
+            if (esNumero(palabras[i])) indicesNumericos.push(i);
+        }
+
+        if (indicesNumericos.length < 2) {
+            fila[0] = texto;
+            return fila;
+        }
+
+        // Mantener intacta la descripción: separar únicamente los dos últimos
+        // valores numéricos identificados, sin fragmentar palabras.
+        const primero = indicesNumericos[indicesNumericos.length - 2];
+        const segundo = indicesNumericos[indicesNumericos.length - 1];
+        fila[0] = palabras[0];
+        fila[1] = palabras.slice(1, primero).join(" ");
+        fila[2] = palabras[primero];
+        fila[3] = palabras[segundo];
+        fila[4] = palabras.slice(segundo + 1).join(" ");
+        return fila;
+    });
+}
+
+
+
+
+
+/*
+
+========================================================
+
+GENERAR TABLA
+
+========================================================
+
+*/
+
+
+
+
+
+function generarTabla() {
+    const entrada = document.getElementById("entrada").value.trim();
+    if (!entrada) {
+        notificar("Pega primero los datos del PDF.", "aviso");
+        return;
+    }
+
+    const encabezados = Array.from(
+        document.querySelectorAll("#encabezados .encabezado-columna")
+    ).map(columna => columna.querySelector("input").value.trim());
+
+    const columnasActivas = encabezados
+        .map((nombre, indice) => ({ nombre, indice }))
+        .filter(columna => columna.nombre !== "");
+
+    if (!columnasActivas.length) {
+        notificar("Necesitas escribir al menos un encabezado.", "aviso");
+        return;
+    }
+
+    const lineas = entrada.split(/\r?\n/).map(x => x.trim()).filter(Boolean);
+    if (!lineas.length) {
+        notificar("No se encontraron datos.", "error");
+        return;
+    }
+
+    const filas = reconstruirFilas(lineas, encabezados.length);
+    const html = [
+        "<table>", "  <thead>", "    <tr>",
+        ...columnasActivas.map(columna => "      <th>" + escaparHTML(columna.nombre) + "</th>"),
+        "    </tr>", "  </thead>", "  <tbody>",
+        ...filas.flatMap(fila => [
+            "    <tr>",
+            ...columnasActivas.map(columna =>
+                "      <td>" + escaparHTML(String(fila[columna.indice] ?? "")) + "</td>"
+            ),
+            "    </tr>"
+        ]),
+        "  </tbody>", "</table>"
+    ].join("\n");
+
+    document.getElementById("codigo").value = html;
+    document.getElementById("vistaPrevia").innerHTML = html;
+    document.querySelectorAll("#vistaPrevia td, #vistaPrevia th").forEach(celda => {
+        celda.contentEditable = "true";
+        celda.spellcheck = false;
+    });
+
+    historialDeshacer = [];
+    historialRehacer = [];
+    actualizarBotonesHistorial();
+    limpiarSeleccion();
+}
+
+
+
+
+
+/*
+
+========================================================
+
+ACTUALIZAR HTML DESPUÉS DE EDITAR LA VISTA PREVIA
+
+========================================================
+
+*/
+
+
+
+function actualizarCodigoDesdeVistaPrevia() {
+    const tabla = document.querySelector("#vistaPrevia table");
+    if (!tabla) return;
+    document.getElementById("codigo").value = obtenerHTMLLimpio(tabla);
+}
+
+
+
+
+
+/*
+
+========================================================
+
+HABILITAR EDICIÓN DIRECTA DE CELDAS
+
+========================================================
+
+*/
+
+
+
+document
+
+    .getElementById("vistaPrevia")
+
+    .addEventListener("input", function(event) {
+
+
+
+        const celda = event.target.closest("td, th");
+
+
+
+        if (!celda || !this.contains(celda)) {
+
+            return;
+
+        }
+
+
+
+        actualizarCodigoDesdeVistaPrevia();
+
+
+
+    });
+
+
+
+
+
+/*
+
+========================================================
+
+COPIAR HTML
+
+========================================================
+
+*/
+
+
+
+async function copiarHTML() {
+
+
+
+
+
+    const codigo =
+
+        document
+
+            .getElementById(
+
+                "codigo"
+
+            )
+
+            .value;
+
+
+
+
+
+    if (!codigo) {
+
+
+
+
+        notificar("Primero genera la tabla.", "aviso");
+
+
+
+
+
+        return;
+
+
+
+    }
+
+
+
+
+
+    try {
+
+
+
+
+
+        await navigator
+
+            .clipboard
+
+            .writeText(
+
+                codigo
+
+            );
+
+
+
+
+        notificar("HTML copiado correctamente.", "exito");
+
+
+
+
+    }
+
+
+
+catch (error) {
+    const textarea = document.getElementById("codigo");
+
+    textarea.select();
+
+    const copiado = document.execCommand("copy");
+
+    textarea.setAttribute("readonly", true);
+
+    if (copiado) {
+        notificar("HTML copiado correctamente.", "exito");
+    } else {
+        notificar("No se pudo copiar el HTML.", "error");
+    }
+}
+}   
+
+
+
+
+/*
+
+========================================================
+
+DESCARGAR HTML
+
+========================================================
+
+*/
+
+
+
+function descargarHTML() {
+
+
+
+
+
+    const codigo =
+
+        document
+
+            .getElementById(
+
+                "codigo"
+
+            )
+
+            .value;
+
+
+
+
+
+    if (!codigo) {
+
+
+
+
+    notificar("Primero genera la tabla.", "aviso");
+
+
+
+
+        return;
+
+
+
+    }
+
+
+
+
+
+    const archivo =
+
+        new Blob(
+
+
+
+            [codigo],
+
+
+
+            {
+
+                type:
+
+                    "text/html;charset=utf-8"
+
+            }
+
+
+
+        );
+
+
+
+
+
+    const url =
+
+        URL.createObjectURL(
+
+            archivo
+
+        );
+
+
+
+
+
+    const enlace =
+
+        document.createElement(
+
+            "a"
+
+        );
+
+
+
+
+
+    enlace.href =
+
+        url;
+
+
+
+
+
+    enlace.download =
+
+        "tabla_generada.html";
+
+
+
+
+
+    document
+
+        .body
+
+        .appendChild(
+
+            enlace
+
+        );
+
+
+
+
+
+    enlace.click();
+
+
+
+
+
+    document
+
+        .body
+
+        .removeChild(
+
+            enlace
+
+        );
+
+
+
+
+
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+notificar("Archivo HTML descargado correctamente.", "exito");
+
+}
+
+
+
+
+
+/*
+
+========================================================
+
+LIMPIAR TODO
+
+========================================================
+
+*/
+
+
+
+function limpiarTodo() {
+
+
+
+
+
+    document
+
+        .getElementById(
+
+            "entrada"
+
+        )
+
+        .value = "";
+
+
+
+
+
+    document
+
+        .getElementById(
+
+            "codigo"
+
+        )
+
+        .value = "";
+
+
+
+
+
+    document
+
+        .getElementById(
+
+            "vistaPrevia"
+
+        )
+
+        .innerHTML =
+
+            '<p style="color:#777;">La tabla aparecerá aquí.</p>';
+
+
+
+
+
+    historialDeshacer = [];
+    historialRehacer = [];
+    actualizarBotonesHistorial();
+    limpiarSeleccion();
+
+
+
+}
+
+
+
+
+
+/*
+
+========================================================
+
+VARIABLES DE SELECCIÓN
+
+========================================================
+
+*/
+
+
+
+let celdasSeleccionadas = [];
+
+
+
+
+
+let seleccionandoConArrastre =
+
+    false;
+
+
+
+
+
+let ignorarClickAutomatico =
+
+    false;
+
+
+
+
+
+/*
+
+========================================================
+
+AGREGAR CELDA
+
+========================================================
+
+*/
+
+
+
+function agregarCeldaSeleccionada(
+
+    celda
+
+) {
+
+
+
+
+
+    if (!celda) {
+
+
+
+        return;
+
+
+
+    }
+
+
+
+
+
+    if (
+
+        !celdasSeleccionadas.includes(
+
+            celda
+
+        )
+
+    ) {
+
+
+
+
+
+        celdasSeleccionadas.push(
+
+            celda
+
+        );
+
+
+
+
+
+        celda.classList.add(
+
+            "celda-seleccionada"
+
+        );
+
+
+
+    }
+
+
+
+}
+
+
+
+
+
+/*
+
+========================================================
+
+QUITAR CELDA
+
+========================================================
+
+*/
+
+
+
+function quitarCeldaSeleccionada(
+
+    celda
+
+) {
+
+
+
+
+
+    celdasSeleccionadas =
+
+        celdasSeleccionadas.filter(
+
+            x => x !== celda
+
+        );
+
+
+
+
+
+    celda.classList.remove(
+
+        "celda-seleccionada"
+
+    );
+
+
+
+}
+
+
+
+
+
+/*
+
+========================================================
+
+MOUSE DOWN
+
+========================================================
+
+*/
+
+
+
+document.addEventListener(
+
+    "mousedown",
+
+    function(event) {
+
+
+
+
+
+        if (
+
+            event.button !== 0
+
+        ) {
+
+
+
+            return;
+
+
+
+        }
+
+
+
+
+
+        const celda =
+
+            event.target.closest(
+
+                "#vistaPrevia td, #vistaPrevia th"
+
+            );
+
+
+
+
+
+        if (!celda) {
+
+
+
+            return;
+
+
+
+        }
+
+
+
+
+
+        if (
+
+            !event.ctrlKey
+
+        ) {
+
+
+
+            return;
+
+
+
+        }
+
+
+
+
+
+        event.preventDefault();
+
+
+
+
+
+        seleccionandoConArrastre =
+
+            true;
+
+
+
+
+
+        if (
+
+            celdasSeleccionadas.includes(
+
+                celda
+
+            )
+
+        ) {
+
+
+
+
+
+            quitarCeldaSeleccionada(
+
+                celda
+
+            );
+
+
+
+
+
+        }
+
+
+
+        else {
+
+
+
+
+
+            agregarCeldaSeleccionada(
+
+                celda
+
+            );
+
+
+
+        }
+
+
+
+
+
+        if (
+
+            celdasSeleccionadas.length >= 2
+
+        ) {
+
+
+
+
+
+            mostrarMenuCombinar(
+
+                event.clientX,
+
+                event.clientY
+
+            );
+
+
+
+
+
+        }
+
+
+
+        else {
+
+
+
+
+
+            ocultarMenuCombinar();
+
+
+
+        }
+
+
+
+    }
+
+);
+
+
+
+
+
+/*
+
+========================================================
+
+MOUSE OVER
+
+========================================================
+
+*/
+
+
+
+document.addEventListener(
+
+    "mouseover",
+
+    function(event) {
+
+
+
+
+
+        if (
+
+            !seleccionandoConArrastre
+
+        ) {
+
+
+
+            return;
+
+
+
+        }
+
+
+
+
+
+        if (
+
+            !event.ctrlKey
+
+        ) {
+
+
+
+            return;
+
+
+
+        }
+
+
+
+
+
+        const celda =
+
+            event.target.closest(
+
+                "#vistaPrevia td, #vistaPrevia th"
+
+            );
+
+
+
+
+
+        if (!celda) {
+
+
+
+            return;
+
+
+
+        }
+
+
+
+
+
+        agregarCeldaSeleccionada(
+
+            celda
+
+        );
+
+
+
+    }
+
+);
+
+
+
+
+
+/*
+
+========================================================
+
+MOUSE UP
+
+========================================================
+
+*/
+
+
+
+document.addEventListener(
+
+    "mouseup",
+
+    function(event) {
+
+
+
+
+
+        if (
+
+            !seleccionandoConArrastre
+
+        ) {
+
+
+
+            return;
+
+
+
+        }
+
+
+
+
+
+        seleccionandoConArrastre =
+
+            false;
+
+
+
+
+
+        ignorarClickAutomatico =
+
+            true;
+
+
+
+
+
+        if (
+
+            celdasSeleccionadas.length >= 2
+
+        ) {
+
+
+
+
+
+            mostrarMenuCombinar(
+
+                event.clientX,
+
+                event.clientY
+
+            );
+
+
+
+        }
+
+
+
+    }
+
+);
+
+
+
+
+
+/*
+
+========================================================
+
+CLICK
+
+========================================================
+
+*/
+
+
+
+document.addEventListener(
+
+    "click",
+
+    function(event) {
+
+
+
+
+
+        if (
+
+            event.target.closest(
+
+                "#menuCombinar"
+
+            )
+
+        ) {
+
+
+
+            return;
+
+
+
+        }
+
+
+
+
+
+        if (
+
+            ignorarClickAutomatico
+
+        ) {
+
+
+
+
+
+            ignorarClickAutomatico =
+
+                false;
+
+
+
+
+
+            return;
+
+
+
+        }
+
+
+
+
+
+        const celda =
+
+            event.target.closest(
+
+                "#vistaPrevia td, #vistaPrevia th"
+
+            );
+
+
+
+
+
+        if (!celda) {
+
+
+
+
+
+            if (
+
+                celdasSeleccionadas.length > 0
+
+            ) {
+
+
+
+
+
+                limpiarSeleccion();
+
+
+
+            }
+
+
+
+
+
+            return;
+
+
+
+        }
+
+
+
+    }
+
+);
+
+
+
+
+
+/*
+
+========================================================
+
+MOSTRAR MENÚ
+
+========================================================
+
+*/
+
+
+
+function mostrarMenuCombinar(
+
+    x,
+
+    y
+
+) {
+
+
+
+
+
+    const menu =
+
+        document.getElementById(
+
+            "menuCombinar"
+
+        );
+
+
+
+
+
+    menu.style.display =
+
+        "block";
+
+
+
+
+
+    const anchoMenu =
+
+        menu.offsetWidth;
+
+
+
+
+
+    const altoMenu =
+
+        menu.offsetHeight;
+
+
+
+
+
+    let posicionX =
+
+        x + 10;
+
+
+
+
+
+    let posicionY =
+
+        y + 10;
+
+
+
+
+
+    if (
+
+        posicionX + anchoMenu >
+
+        window.innerWidth
+
+    ) {
+
+
+
+
+
+        posicionX =
+
+            window.innerWidth -
+
+            anchoMenu -
+
+            10;
+
+
+
+    }
+
+
+
+
+
+    if (
+
+        posicionY + altoMenu >
+
+        window.innerHeight
+
+    ) {
+
+
+
+
+
+        posicionY =
+
+            window.innerHeight -
+
+            altoMenu -
+
+            10;
+
+
+
+    }
+
+
+
+
+
+    menu.style.left =
+
+        posicionX + "px";
+
+
+
+
+
+    menu.style.top =
+
+        posicionY + "px";
+
+
+
+}
+
+
+
+
+
+/*
+
+========================================================
+
+OCULTAR MENÚ
+
+========================================================
+
+*/
+
+
+
+function ocultarMenuCombinar() {
+
+
+
+
+
+    document
+
+        .getElementById(
+
+            "menuCombinar"
+
+        )
+
+        .style.display =
+
+            "none";
+
+
+
+}
+
+
+
+
+
+/*
+
+========================================================
+
+LIMPIAR SELECCIÓN
+
+========================================================
+
+*/
+
+
+
+function limpiarSeleccion() {
+
+
+
+
+
+    celdasSeleccionadas.forEach(
+
+        celda => {
+
+
+
+
+
+            if (celda) {
+
+
+
+
+
+                celda.classList.remove(
+
+                    "celda-seleccionada"
+
+                );
+
+
+
+            }
+
+
+
+        }
+
+    );
+
+
+
+
+
+    celdasSeleccionadas = [];
+
+
+
+
+
+    seleccionandoConArrastre =
+
+        false;
+
+
+
+
+
+    ignorarClickAutomatico =
+
+        false;
+
+
+
+
+
+    ocultarMenuCombinar();
+
+
+
+}
+
+
+
+
+
+/*
+
+========================================================
+
+CONSTRUIR MAPA DE POSICIONES DE LA TABLA
+
+SOPORTA COLSPAN Y ROWSPAN
+
+========================================================
+
+*/
+
+
+
+function construirMapaTabla(filas) {
+    const mapa = [];
+    const posiciones = new Map();
+
+    filas.forEach((fila, indiceFila) => {
+        if (!mapa[indiceFila]) {
+            mapa[indiceFila] = [];
+        }
+
+        let columna = 0;
+
+        Array.from(fila.cells).forEach(celda => {
+            // Buscar la primera posición libre.
+            while (mapa[indiceFila][columna]) {
+                columna++;
+            }
+
+            const colspan = Math.max(
+                1,
+                Number(celda.colSpan) || 1
+            );
+
+            const rowspan = Math.max(
+                1,
+                Number(celda.rowSpan) || 1
+            );
+
+            const posicion = {
+                celda,
+                filaInicial: indiceFila,
+                filaFinal: indiceFila + rowspan - 1,
+                columnaInicial: columna,
+                columnaFinal: columna + colspan - 1,
+                rowspan,
+                colspan
+            };
+
+            posiciones.set(celda, posicion);
+
+            // Registrar las posiciones ocupadas por la celda.
+            for (
+                let f = indiceFila;
+                f <= posicion.filaFinal;
+                f++
+            ) {
+                if (!mapa[f]) {
+                    mapa[f] = [];
+                }
+
+                for (
+                    let c = columna;
+                    c <= posicion.columnaFinal;
+                    c++
+                ) {
+                    if (mapa[f][c]) {
+                        throw new Error(
+                            "La tabla contiene celdas superpuestas."
+                        );
+                    }
+
+                    mapa[f][c] = celda;
+                }
+            }
+
+            columna += colspan;
+        });
+    });
+
+    return { mapa, posiciones };
+}
+
+
+
+
+
+/*
+
+========================================================
+
+COMBINAR CELDAS SELECCIONADAS
+
+HORIZONTAL Y VERTICALMENTE
+
+========================================================
+
+*/
+
+
+
+
+
+function actualizarBotonesHistorial() {
+    const deshacer = document.getElementById("botonDeshacer");
+    const rehacer = document.getElementById("botonRehacer");
+    if (deshacer) deshacer.disabled = historialDeshacer.length === 0;
+    if (rehacer) rehacer.disabled = historialRehacer.length === 0;
+}
+
+function guardarEstadoAntesDeCombinar(tabla) {
+    // Guardar la tabla completa, no solo su contenido interno.
+    historialDeshacer.push(tabla.outerHTML);
+    if (historialDeshacer.length > 50) historialDeshacer.shift();
+    historialRehacer = [];
+    actualizarBotonesHistorial();
+}
+
+function restaurarEstadoTabla(htmlTabla) {
+    const vista = document.getElementById("vistaPrevia");
+
+    // Reponer el elemento <table> completo para que siga existiendo
+    // y las siguientes acciones de deshacer/rehacer puedan localizarlo.
+    vista.innerHTML = htmlTabla;
+
+    const tablaRestaurada = vista.querySelector("table");
+    if (!tablaRestaurada) {
+        actualizarBotonesHistorial();
+        return;
+    }
+
+    tablaRestaurada.querySelectorAll("td, th").forEach(celda => {
+        celda.contentEditable = "true";
+        celda.spellcheck = false;
+        celda.classList.remove("celda-seleccionada");
+    });
+
+    limpiarSeleccion();
+    actualizarCodigoDesdeVistaPrevia();
+    actualizarBotonesHistorial();
+}
+
+function deshacerCombinacion() {
+    const tabla = document.querySelector("#vistaPrevia table");
+    if (!tabla || !historialDeshacer.length) return;
+
+    // El estado actual pasa a rehacer; se conserva también la etiqueta <table>.
+    historialRehacer.push(tabla.outerHTML);
+    restaurarEstadoTabla(historialDeshacer.pop());
+}
+
+function rehacerCombinacion() {
+    const tabla = document.querySelector("#vistaPrevia table");
+    if (!tabla || !historialRehacer.length) return;
+
+    // El estado actual pasa a deshacer antes de restaurar el estado siguiente.
+    historialDeshacer.push(tabla.outerHTML);
+    restaurarEstadoTabla(historialRehacer.pop());
+}
+
+
+function combinarCeldasSeleccionadas() {
+    if (celdasSeleccionadas.length < 2) {
+        return;
+    }
+
+    const seleccion = [...celdasSeleccionadas];
+
+    const tabla = seleccion[0].closest("table");
+
+    if (!tabla || !tabla.isConnected) {
+        notificar("No se encontró la tabla seleccionada.", "error");
+        limpiarSeleccion();
+        return;
+    }
+
+    // Todas las celdas deben pertenecer a la misma tabla.
+    if (seleccion.some(celda =>
+        !celda.isConnected ||
+        celda.closest("table") !== tabla
+    )) {
+        notificar(
+            "Las celdas deben pertenecer a la misma tabla.",
+            "error"
+        );
+        limpiarSeleccion();
+        return;
+    }
+
+    // Evitar combinar entre secciones diferentes.
+    const grupo = seleccion[0].closest("thead, tbody, tfoot");
+
+    if (!grupo || seleccion.some(celda =>
+        celda.closest("thead, tbody, tfoot") !== grupo
+    )) {
+        notificar(
+            "Las celdas deben pertenecer a la misma sección de la tabla.",
+            "aviso"
+        );
+        return;
+    }
+
+    const filas = Array.from(grupo.rows);
+
+    let mapa;
+    let posiciones;
+
+    try {
+        ({ mapa, posiciones } = construirMapaTabla(filas));
+    } catch (error) {
+        notificar(
+            "La estructura de la tabla no es válida para combinar.",
+            "error"
+        );
+        return;
+    }
+
+    const conjunto = new Set(seleccion);
+    const posicionesSeleccionadas = [];
+
+    for (const celda of seleccion) {
+        const posicion = posiciones.get(celda);
+
+        if (!posicion) {
+            notificar(
+                "No se pudo determinar la posición de una celda.",
+                "error"
+            );
+            return;
+        }
+
+        if (posicion.filaFinal >= filas.length) {
+            notificar(
+                "Existe una combinación vertical que excede la sección.",
+                "error"
+            );
+            return;
+        }
+
+        posicionesSeleccionadas.push(posicion);
+    }
+
+    // Determinar los límites del bloque.
+    const filaInicial = Math.min(
+        ...posicionesSeleccionadas.map(p => p.filaInicial)
+    );
+
+    const filaFinal = Math.max(
+        ...posicionesSeleccionadas.map(p => p.filaFinal)
+    );
+
+    const columnaInicial = Math.min(
+        ...posicionesSeleccionadas.map(p => p.columnaInicial)
+    );
+
+    const columnaFinal = Math.max(
+        ...posicionesSeleccionadas.map(p => p.columnaFinal)
+    );
+
+    const nuevoRowspan = filaFinal - filaInicial + 1;
+    const nuevoColspan = columnaFinal - columnaInicial + 1;
+
+    // Comprobar que todas las posiciones del rectángulo
+    // estén ocupadas exclusivamente por celdas seleccionadas.
+    for (let f = filaInicial; f <= filaFinal; f++) {
+        for (let c = columnaInicial; c <= columnaFinal; c++) {
+            const celda = mapa[f]?.[c];
+
+            if (!celda || !conjunto.has(celda)) {
+                notificar(
+                    "Las celdas seleccionadas deben formar un bloque rectangular continuo.",
+                    "error"
+                );
+                return;
+            }
+        }
+    }
+
+    // Comprobar que ninguna celda sobresalga del bloque.
+    for (const posicion of posicionesSeleccionadas) {
+        if (
+            posicion.filaInicial < filaInicial ||
+            posicion.filaFinal > filaFinal ||
+            posicion.columnaInicial < columnaInicial ||
+            posicion.columnaFinal > columnaFinal
+        ) {
+            notificar(
+                "Debes incluir completamente las celdas que ya están combinadas.",
+                "aviso"
+            );
+            return;
+        }
+    }
+
+    // Identificar la celda principal.
+    const primeraCelda = mapa[filaInicial]?.[columnaInicial];
+
+    if (!primeraCelda || !conjunto.has(primeraCelda)) {
+        notificar("No se encontró la celda principal.", "error");
+        return;
+    }
+
+    // Ordenar de arriba abajo y de izquierda a derecha.
+    posicionesSeleccionadas.sort((a, b) =>
+        a.filaInicial - b.filaInicial ||
+        a.columnaInicial - b.columnaInicial
+    );
+
+    // Conservar el contenido de todas las celdas.
+    const contenido = posicionesSeleccionadas
+        .map(p => p.celda.innerHTML.trim())
+        .filter(Boolean)
+        .join("<br>");
+
+    // Guardar el estado antes de modificar la tabla.
+    guardarEstadoAntesDeCombinar(tabla);
+
+    // Aplicar la combinación.
+    primeraCelda.innerHTML = contenido;
+    primeraCelda.colSpan = nuevoColspan;
+    primeraCelda.rowSpan = nuevoRowspan;
+
+    // Eliminar las celdas secundarias.
+    posicionesSeleccionadas.forEach(posicion => {
+        if (posicion.celda !== primeraCelda) {
+            posicion.celda.remove();
+        }
+    });
+
+    // Actualizar el HTML generado.
+    actualizarCodigoDesdeVistaPrevia();
+
+    // Limpiar selección.
+    limpiarSeleccion();
+
+    actualizarBotonesHistorial();
+
+    notificar("Celdas combinadas correctamente.", "exito");
+}
+
+
+
+
+
+/*
+
+========================================================
+
+PROTEGER MENÚ
+
+========================================================
+
+*/
+
+
+
+document
+
+    .getElementById(
+
+        "menuCombinar"
+
+    )
+
+    .addEventListener(
+
+        "mousedown",
+
+        function(event) {
+
+
+
+
+
+            event.stopPropagation();
+
+
+
+        }
+
+    );
+
+
+
+
+
+document
+
+    .getElementById(
+
+        "menuCombinar"
+
+    )
+
+    .addEventListener(
+
+        "click",
+
+        function(event) {
+
+
+
+
+
+            event.stopPropagation();
+
+
+
+        }
+
+    );
+
+
+
+/* =========================================
+   PROYECTOS: VARIAS TABLAS CON GUARDADO AUTOMÁTICO
+   Se conserva cada espacio de trabajo en localStorage.
+========================================= */
+(function sistemaProyectosTablas() {
+    const CLAVE = "tablasRPP_proyectos_v1";
+    const contenedorLista = document.getElementById("trpp-lista-tablas");
+    const botonNueva = document.getElementById("trpp-nueva-tabla");
+    const estadoGuardado = document.getElementById("trpp-estado-guardado");
+    const entrada = document.getElementById("entrada");
+    const codigo = document.getElementById("codigo");
+    const vista = document.getElementById("vistaPrevia");
+    const encabezados = document.getElementById("encabezados");
+
+    if (!contenedorLista || !botonNueva || !entrada || !codigo || !vista || !encabezados) return;
+
+    const plantillaEncabezados = encabezados.innerHTML;
+    let proyectos = [];
+    let proyectoActivoId = null;
+    let temporizadorGuardado = null;
+    let restaurando = false;
+
+    function idNuevo() {
+        return (window.crypto && crypto.randomUUID)
+            ? crypto.randomUUID()
+            : "tabla-" + Date.now() + "-" + Math.random().toString(16).slice(2);
+    }
+
+    function leerAlmacenamiento() {
+        try {
+            const datos = JSON.parse(localStorage.getItem(CLAVE) || "null");
+            if (datos && Array.isArray(datos.proyectos)) {
+                proyectos = datos.proyectos.filter(p => p && p.id && p.estado);
+                proyectoActivoId = datos.activoId || null;
+            }
+        } catch (error) {
+            console.error("No se pudieron leer las tablas guardadas:", error);
+            proyectos = [];
+            proyectoActivoId = null;
+        }
+    }
+
+    function guardarAlmacenamiento() {
+        try {
+            localStorage.setItem(CLAVE, JSON.stringify({
+                version: 1,
+                activoId: proyectoActivoId,
+                proyectos
+            }));
+            if (estadoGuardado) estadoGuardado.textContent = "✓ Guardado automáticamente";
+            return true;
+        } catch (error) {
+            console.error("No se pudieron guardar las tablas:", error);
+            if (estadoGuardado) estadoGuardado.textContent = "No se pudo guardar";
+            if (typeof notificar === "function") {
+                notificar("No se pudo guardar. El almacenamiento podría estar lleno.", "error");
+            }
+            return false;
+        }
+    }
+
+    function capturarEstadoActual() {
+        return {
+            entrada: entrada.value,
+            encabezadosHTML: encabezados.innerHTML,
+            numeroColumnas: encabezados.querySelectorAll(".encabezado-columna").length,
+            tablaHTML: vista.innerHTML,
+            codigo: codigo.value
+        };
+    }
+
+    function tieneContenido(estado) {
+        return !!(
+            (estado.entrada && estado.entrada.trim()) ||
+            (estado.codigo && estado.codigo.trim()) ||
+            (estado.tablaHTML && estado.tablaHTML.includes("<table")) ||
+            (estado.encabezadosHTML && estado.encabezadosHTML !== plantillaEncabezados)
+        );
+    }
+
+    function proyectoActivo() {
+        return proyectos.find(p => p.id === proyectoActivoId) || null;
+    }
+
+    function guardarProyectoActivo() {
+        if (restaurando) return;
+        const proyecto = proyectoActivo();
+        if (!proyecto) return;
+        proyecto.estado = capturarEstadoActual();
+        proyecto.actualizado = Date.now();
+        guardarAlmacenamiento();
+    }
+
+    function programarGuardado() {
+        if (restaurando) return;
+        if (temporizadorGuardado) clearTimeout(temporizadorGuardado);
+        // Pequeña pausa para agrupar tecleo; pagehide también fuerza el guardado.
+        temporizadorGuardado = setTimeout(guardarProyectoActivo, 180);
+    }
+
+    function renderizarLista() {
+        contenedorLista.innerHTML = "";
+        const ordenados = [...proyectos].sort((a, b) => (b.actualizado || 0) - (a.actualizado || 0));
+
+        if (!ordenados.length) {
+            const vacio = document.createElement("div");
+            vacio.className = "trpp-proyectos-vacio";
+            vacio.textContent = "Tus tablas guardadas aparecerán aquí.";
+            contenedorLista.appendChild(vacio);
+            return;
+        }
+
+        ordenados.forEach(proyecto => {
+            const fila = document.createElement("div");
+            fila.className = "trpp-proyecto-fila" + (proyecto.id === proyectoActivoId ? " activo" : "");
+
+            const abrir = document.createElement("button");
+            abrir.type = "button";
+            abrir.className = "trpp-proyecto-abrir";
+            abrir.dataset.accion = "abrir";
+            abrir.dataset.id = proyecto.id;
+            abrir.title = proyecto.nombre + " · Clic derecho para opciones";
+            abrir.setAttribute("aria-current", proyecto.id === proyectoActivoId ? "page" : "false");
+
+            const icono = document.createElement("span");
+            icono.className = "trpp-proyecto-icono";
+            icono.textContent = "▤";
+            const nombre = document.createElement("span");
+            nombre.className = "trpp-proyecto-nombre";
+            nombre.textContent = proyecto.nombre || "Tabla sin título";
+            abrir.append(icono, nombre);
+
+
+            const borrar = document.createElement("button");
+            borrar.type = "button";
+            borrar.className = "trpp-proyecto-borrar";
+            borrar.dataset.accion = "borrar";
+            borrar.dataset.id = proyecto.id;
+            borrar.title = "Eliminar " + (proyecto.nombre || "tabla");
+            borrar.setAttribute("aria-label", borrar.title);
+            borrar.textContent = "×";
+
+            fila.append(abrir, borrar);
+            contenedorLista.appendChild(fila);
+        });
+    }
+
+    function restaurarProyecto(proyecto) {
+        if (!proyecto) return;
+        restaurando = true;
+        if (temporizadorGuardado) clearTimeout(temporizadorGuardado);
+
+        const estado = proyecto.estado || {};
+        entrada.value = estado.entrada || "";
+        encabezados.innerHTML = estado.encabezadosHTML || plantillaEncabezados;
+        numeroColumnas = encabezados.querySelectorAll(".encabezado-columna").length || 5;
+        vista.innerHTML = estado.tablaHTML || '<p style="color:#777;">La tabla aparecerá aquí.</p>';
+        codigo.value = estado.codigo || "";
+
+        vista.querySelectorAll("td, th").forEach(celda => {
+            celda.contentEditable = "true";
+            celda.spellcheck = false;
+            celda.classList.remove("celda-seleccionada");
+        });
+
+        historialDeshacer = [];
+        historialRehacer = [];
+        if (typeof actualizarBotonesHistorial === "function") actualizarBotonesHistorial();
+        if (typeof limpiarSeleccion === "function") limpiarSeleccion();
+        if (typeof actualizarCarrusel === "function") requestAnimationFrame(actualizarCarrusel);
+
+        restaurando = false;
+        renderizarLista();
+        if (estadoGuardado) estadoGuardado.textContent = "✓ Tabla recuperada";
+    }
+
+    function crearTablaNueva() {
+        guardarProyectoActivo();
+        const ahora = Date.now();
+        const proyecto = {
+            id: idNuevo(),
+            nombre: "Tabla nueva",
+            creado: ahora,
+            actualizado: ahora,
+            estado: {
+                entrada: "",
+                encabezadosHTML: plantillaEncabezados,
+                numeroColumnas: 5,
+                tablaHTML: '<p style="color:#777;">La tabla aparecerá aquí.</p>',
+                codigo: ""
+            }
+        };
+        proyectos.unshift(proyecto);
+        proyectoActivoId = proyecto.id;
+        restaurarProyecto(proyecto);
+        guardarAlmacenamiento();
+        entrada.focus();
+        if (typeof notificar === "function") notificar("Se creó una tabla nueva.", "exito");
+    }
+
+    const menuProyecto = document.getElementById("trpp-menu-proyecto");
+    const modalProyecto = document.getElementById("trpp-modal-proyecto");
+    const inputNombre = document.getElementById("trpp-proyecto-nombre-input");
+    const tituloDialogo = document.getElementById("trpp-proyecto-titulo");
+    const descripcionDialogo = document.getElementById("trpp-proyecto-descripcion");
+    const botonAceptarDialogo = document.getElementById("trpp-proyecto-aceptar");
+    let proyectoMenuId = null;
+    let accionDialogo = null;
+
+    function cerrarMenuProyecto() {
+        menuProyecto.classList.remove("visible");
+        proyectoMenuId = null;
+    }
+    function abrirMenuProyecto(id, x, y) {
+        proyectoMenuId = id;
+        menuProyecto.style.left = Math.max(8, Math.min(x, innerWidth - 180)) + "px";
+        menuProyecto.style.top = Math.max(8, Math.min(y, innerHeight - 100)) + "px";
+        menuProyecto.classList.add("visible");
+    }
+    function abrirDialogo(tipo, id) {
+        const proyecto = proyectos.find(p => p.id === id);
+        if (!proyecto) return;
+        accionDialogo = {tipo, id};
+        if (tipo === "renombrar") {
+            tituloDialogo.textContent = "Renombrar tabla";
+            descripcionDialogo.textContent = "Escribe un nombre para identificar esta tabla.";
+            inputNombre.hidden = false;
+            inputNombre.value = proyecto.nombre || "Tabla nueva";
+            botonAceptarDialogo.textContent = "Guardar";
+            botonAceptarDialogo.className = "principal";
+        } else {
+            tituloDialogo.textContent = "¿Eliminar esta tabla?";
+            descripcionDialogo.textContent = 'Se eliminará «' + (proyecto.nombre || "Tabla sin título") + '». Esta acción no se puede deshacer.';
+            inputNombre.hidden = true;
+            botonAceptarDialogo.textContent = "Eliminar tabla";
+            botonAceptarDialogo.className = "trpp-boton-peligro";
+        }
+        modalProyecto.classList.add("visible");
+        modalProyecto.setAttribute("aria-hidden", "false");
+        if (tipo === "renombrar") setTimeout(() => { inputNombre.focus(); inputNombre.select(); }, 50);
+        cerrarMenuProyecto();
+    }
+    function cerrarDialogo() {
+        modalProyecto.classList.remove("visible");
+        modalProyecto.setAttribute("aria-hidden", "true");
+        accionDialogo = null;
+    }
+    function renombrarProyecto(id, nombreForzado) {
+        const proyecto = proyectos.find(p => p.id === id);
+        if (!proyecto) return;
+        const limpio = String(nombreForzado ?? "").trim();
+        if (!limpio) { if (typeof notificar === "function") notificar("El nombre no puede quedar vacío.", "aviso"); return; }
+        proyecto.nombre = limpio.slice(0, 70);
+        proyecto.actualizado = Date.now();
+        guardarAlmacenamiento(); renderizarLista();
+    }
+
+    function eliminarProyecto(id, confirmado = false) {
+        const proyecto = proyectos.find(p => p.id === id);
+        if (!proyecto) return;
+
+
+        proyectos = proyectos.filter(p => p.id !== id);
+        if (proyectoActivoId === id) {
+            const siguiente = [...proyectos].sort((a, b) => (b.actualizado || 0) - (a.actualizado || 0))[0];
+            if (siguiente) {
+                proyectoActivoId = siguiente.id;
+                restaurarProyecto(siguiente);
+            } else {
+                proyectoActivoId = null;
+                crearTablaNueva();
+            }
+        }
+        guardarAlmacenamiento();
+        renderizarLista();
+        if (typeof notificar === "function") notificar("Tabla eliminada.", "exito");
+    }
+
+    botonNueva.addEventListener("click", crearTablaNueva);
+    contenedorLista.addEventListener("click", event => {
+        const boton = event.target.closest("button[data-accion]");
+        if (!boton) return;
+        const { accion, id } = boton.dataset;
+        if (accion === "abrir") {
+            if (id === proyectoActivoId) return;
+            guardarProyectoActivo();
+            proyectoActivoId = id;
+            const proyecto = proyectoActivo();
+            // La tabla que se abre pasa al primer lugar; las demás conservan
+            // su orden relativo y vuelven a su posición al cambiar de tabla.
+            const mayorActualizado = proyectos.reduce((max, p) => Math.max(max, p.actualizado || 0), 0);
+            proyecto.actualizado = Math.max(Date.now(), mayorActualizado + 1);
+            restaurarProyecto(proyecto);
+            guardarAlmacenamiento();
+            if (typeof notificar === "function") notificar('Cambiaste a "' + (proyecto.nombre || "Tabla sin título") + '".', "exito");
+        } else if (accion === "borrar") {
+            abrirDialogo("eliminar", id);
+        }
+    });
+
+    contenedorLista.addEventListener("contextmenu", event => {
+        const abrir = event.target.closest(".trpp-proyecto-abrir");
+        if (!abrir) return;
+        event.preventDefault(); abrirMenuProyecto(abrir.dataset.id, event.clientX, event.clientY);
+    });
+    menuProyecto.addEventListener("click", event => {
+        const boton = event.target.closest("button[data-menu-accion]");
+        if (!boton || !proyectoMenuId) return;
+        abrirDialogo(boton.dataset.menuAccion, proyectoMenuId);
+    });
+    document.addEventListener("click", event => {
+        if (!event.target.closest("#trpp-menu-proyecto")) cerrarMenuProyecto();
+    });
+    document.addEventListener("keydown", event => {
+        if (event.key === "Escape") { cerrarMenuProyecto(); cerrarDialogo(); }
+        if (event.key === "Enter" && modalProyecto.classList.contains("visible")) botonAceptarDialogo.click();
+    });
+    document.getElementById("trpp-proyecto-cancelar").addEventListener("click", cerrarDialogo);
+    modalProyecto.addEventListener("click", event => { if (event.target === modalProyecto) cerrarDialogo(); });
+    botonAceptarDialogo.addEventListener("click", () => {
+        if (!accionDialogo) return;
+        const {tipo, id} = accionDialogo;
+        if (tipo === "renombrar") renombrarProyecto(id, inputNombre.value);
+        else eliminarProyecto(id, true);
+        cerrarDialogo();
+    });
+
+    // Cualquier edición del contenido, encabezados o vista previa activa el guardado.
+    document.addEventListener("input", event => {
+        if (event.target.closest("#entrada, #codigo, #encabezados, #vistaPrevia")) programarGuardado();
+    });
+    document.addEventListener("change", event => {
+        if (event.target.closest("#entrada, #encabezados")) programarGuardado();
+    });
+    // Captura acciones como agregar/quitar columnas, generar y limpiar.
+    document.addEventListener("click", event => {
+        // Incluye acciones que cambian el contenido sin disparar input,
+        // como Generar tabla y Limpiar, además de agregar/quitar columnas.
+        if (event.target.closest(".contenedor")) {
+            setTimeout(programarGuardado, 0);
+        }
+    });
+    window.addEventListener("pagehide", () => {
+        if (temporizadorGuardado) clearTimeout(temporizadorGuardado);
+        guardarProyectoActivo();
+        guardarAlmacenamiento();
+    });
+    window.addEventListener("beforeunload", () => {
+        if (temporizadorGuardado) clearTimeout(temporizadorGuardado);
+        guardarProyectoActivo();
+        guardarAlmacenamiento();
+    });
+
+    leerAlmacenamiento();
+    if (!proyectos.length) {
+        const estadoInicial = capturarEstadoActual();
+        const ahora = Date.now();
+        const proyectoInicial = {
+            id: idNuevo(),
+            nombre: tieneContenido(estadoInicial) ? "Mi primera tabla" : "Tabla nueva",
+            creado: ahora,
+            actualizado: ahora,
+            estado: estadoInicial
+        };
+        proyectos.push(proyectoInicial);
+        proyectoActivoId = proyectoInicial.id;
+        guardarAlmacenamiento();
+    } else {
+        let activo = proyectos.find(p => p.id === proyectoActivoId);
+        if (!activo) {
+            activo = [...proyectos].sort((a, b) => (b.actualizado || 0) - (a.actualizado || 0))[0];
+            proyectoActivoId = activo.id;
+        }
+        restaurarProyecto(activo);
+        guardarAlmacenamiento();
+    }
+    renderizarLista();
+})();
+
+        
+(function sistemaSidebarInicial() {
+
+    const sidebar = document.getElementById("trpp-sidebar");
+    const app = document.querySelector(".contenedor");
+
+    if (!sidebar || !app) return;
+
+    function ajustarAplicacion() {
+
+        const anchoVentana = document.documentElement.clientWidth;
+
+        const sidebarRect = sidebar.getBoundingClientRect();
+        const appRect = app.getBoundingClientRect();
+
+        // Si la ventana tiene espacio suficiente,
+        // restaurar el centrado original.
+        const anchoOriginal = app.offsetWidth;
+
+        const posicionCentrada =
+            (anchoVentana - anchoOriginal) / 2;
+
+        const hayInterferencia =
+            sidebarRect.right > posicionCentrada &&
+            sidebarRect.bottom > appRect.top &&
+            sidebarRect.top < appRect.bottom;
+
+        if (anchoVentana > 1400 || !hayInterferencia) {
+
+            app.style.removeProperty("margin-left");
+            app.style.removeProperty("width");
+            app.style.removeProperty("margin-right");
+
+            return;
+        }
+
+        // Solo corregir la interferencia en ventana pequeña.
+        const espacio = 20;
+        const izquierda = sidebarRect.right + espacio;
+
+        const disponible =
+            anchoVentana - izquierda - espacio;
+
+        app.style.width = disponible + "px";
+        app.style.marginLeft = izquierda + "px";
+        app.style.marginRight = espacio + "px";
+    }
+
+    window.addEventListener("load", () => {
+        requestAnimationFrame(ajustarAplicacion);
+    });
+
+    // Recalcular cuando cambia el tamaño de la ventana.
+    window.addEventListener("resize", () => {
+        requestAnimationFrame(ajustarAplicacion);
+    });
+
+})();
+
+
+const botonMaximizar = document.querySelector('.trpp-maximizar');
+const iconoMaximizar = document.getElementById('iconoMaximizar');
+
+function actualizarIconoMaximizar(maximizada) {
+
+    if (!botonMaximizar || !iconoMaximizar) return;
+
+    if (maximizada) {
+
+        botonMaximizar.title = 'Restaurar';
+        botonMaximizar.setAttribute('aria-label', 'Restaurar');
+
+        iconoMaximizar.innerHTML = `
+            <path d="M6 3H13V10"/>
+            <path d="M10 6H3V13H10V6Z"/>
+        `;
+
+    } else {
+
+        botonMaximizar.title = 'Maximizar';
+        botonMaximizar.setAttribute('aria-label', 'Maximizar');
+
+        iconoMaximizar.innerHTML = `
+            <rect x="3" y="3" width="10" height="10" rx="1.15"/>
+        `;
+    }
+}
+
+// Consultar estado inicial
+window.tablasRPPWindow.isMaximized().then(actualizarIconoMaximizar);
+
+// Escuchar cambios de estado
+window.tablasRPPWindow.onMaximizeState(actualizarIconoMaximizar);
+
+/* =========================================
+   SISTEMA DE ACTUALIZACIÓN AUTOMÁTICA (electron-updater)
+   ========================================= */
+(function gestionarActualizaciones() {
+    // Si la API no está disponible (por ejemplo, si se abre en un navegador web), salimos de forma segura
+    if (!window.tablasRPPWindow || !window.tablasRPPWindow.updater) return;
+
+    const updater = window.tablasRPPWindow.updater;
+
+    // Crear dinámicamente el modal de actualización respetando tus estilos
+    function crearModalActualizacion(versionInfo) {
+        // Evitar duplicados si ya existe el modal
+        if (document.getElementById("trpp-modal-actualizacion")) return;
+
+        const modalFondo = document.createElement("div");
+        modalFondo.id = "trpp-modal-actualizacion";
+        modalFondo.className = "trpp-modal-fondo visible";
+        modalFondo.setAttribute("role", "dialog");
+        modalFondo.setAttribute("aria-modal", "true");
+
+        modalFondo.innerHTML = `
+            <div class="trpp-modal trpp-about" role="document">
+                <div class="trpp-logo-about">✨</div>
+                <h2>¡Nueva versión disponible!</h2>
+                <p class="trpp-modal-descripcion">
+                    Se ha descargado la versión <strong>${versionInfo?.version || "nueva"}</strong> de TablasRPP. 
+                    Reinicia la aplicación para aplicar los cambios y disfrutar de las mejoras.
+                </p>
+                <div class="trpp-modal-acciones" style="justify-content: center; margin-top: 20px;">
+                    <button type="button" id="btnMasTarde" class="trpp-boton-secundario">Más tarde</button>
+                    <button type="button" id="btnReiniciar" class="principal">Reiniciar y actualizar</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modalFondo);
+
+        // Botón Más tarde
+        document.getElementById("btnMasTarde").addEventListener("click", () => {
+            modalFondo.classList.remove("visible");
+            setTimeout(() => modalFondo.remove(), 200);
+        });
+
+        // Botón Reiniciar e instalar
+        document.getElementById("btnReiniciar").addEventListener("click", () => {
+            document.getElementById("btnReiniciar").textContent = "Reiniciando...";
+            document.getElementById("btnReiniciar").disabled = true;
+            updater.install();
+        });
+    }
+
+    // Escuchar eventos del proceso principal (main.js)
+    updater.onChecking(() => {
+        console.log("Buscando actualizaciones para TablasRPP...");
+    });
+
+    updater.onAvailable((info) => {
+        notificar("Hay una actualización en camino. Descargando...", "aviso");
+    });
+
+    updater.onNotAvailable(() => {
+        console.log("La aplicación está actualizada.");
+    });
+
+    updater.onProgress((progress) => {
+        // Opcional: puedes registrar el progreso de descarga si lo deseas
+        console.log(`Progreso de descarga: ${Math.round(progress.percent)}%`);
+    });
+
+    // Cuando la actualización se descarga por completo, mostramos tu menú bonito
+    updater.onDownloaded((info) => {
+        notificar("¡Actualización lista para instalarse!", "exito");
+        crearModalActualizacion(info);
+    });
+
+    updater.onError((error) => {
+        console.error("Error en el actualizador automático:", error);
+    });
+})();
+
+</script>
+
+
+
+
+
+</body>
+
+
+
+</html>

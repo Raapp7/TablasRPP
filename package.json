@@ -1,0 +1,51 @@
+
+{
+  "name": "tablasrpp",
+  "version": "1.1.1",
+  "description": "Convertidor de documentos PDF a tablas",
+  "main": "main.js",
+  "author": "TablasRPP",
+  "license": "ISC",
+  "type": "commonjs",
+ "scripts": {
+  "start": "electron .",
+  "dist": "electron-builder --win nsis",
+  "publish": "electron-builder --win nsis --publish always",
+  "test": "echo \"Error: no test specified\" && exit 1"
+},
+  "devDependencies": {
+    "electron": "^44.7.0",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "com.tablasrpp.app",
+    "productName": "TablasRPP",
+    "directories": {
+      "output": "dist"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "Raapp7",
+      "repo": "TablasRPP"
+    },
+    "files": [
+      "**/*",
+      "!dist/**",
+      "!node_modules/.cache/**"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "TablasRPP"
+    }
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.11"
+  }
+}
